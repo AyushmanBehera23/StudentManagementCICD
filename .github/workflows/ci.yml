@@ -101,7 +101,9 @@ jobs:
     needs: [integration]
     permissions:
       contents: read
-      packages: write      # only this job can push images
+      packages: write
+      security-events: write  # required for Trivy SARIF upload
+      id-token: write         # required for provenance attestation
     outputs:
       digest: ${{ steps.push.outputs.digest }}
     steps:
@@ -157,7 +159,7 @@ jobs:
           provenance: true
           sbom: true
       - name: Record image tag and digest (evidence)
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.push.outputs.digest != ''
         run: |
           {
             echo "### Published image"
@@ -167,7 +169,7 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}" > image-digest.txt
       - uses: actions/upload-artifact@v4
-        if: github.event_name != 'pull_request'
+        if: github.event_name != 'pull_request' && steps.push.outputs.digest != ''
         with:
           name: image-digest
           path: image-digest.txt
