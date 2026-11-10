@@ -66,7 +66,7 @@ jobs:
       - run: pip install -r requirements-dev.txt
       - name: Run API tests
         run: pytest --junitxml=test-results.xml
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with:
           name: test-results
@@ -168,7 +168,7 @@ jobs:
             echo "- Commit: \`${{ github.sha }}\`"
           } >> "$GITHUB_STEP_SUMMARY"
           echo "${{ env.IMAGE_NAME }}@${{ steps.push.outputs.digest }}" > image-digest.txt
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: github.event_name != 'pull_request' && steps.push.outputs.digest != ''
         with:
           name: image-digest
