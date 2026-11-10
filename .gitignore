@@ -1,0 +1,16 @@
+.env
+.env.*
+!.env.example
+secrets/*
+!secrets/.gitkeep
+deploy/certs/
+backups/*
+!backups/.gitkeep
+.release/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+.DS_Store

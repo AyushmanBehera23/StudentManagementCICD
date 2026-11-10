@@ -1,0 +1,17 @@
+.git
+.github
+.env
+.env.*
+!.env.example
+secrets
+backups
+evidence
+deploy/certs
+docs
+tests
+__pycache__
+*.pyc
+.pytest_cache
+.ruff_cache
+.venv
+*.md
