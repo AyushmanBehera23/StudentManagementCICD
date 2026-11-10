@@ -4,6 +4,10 @@
 # Drill B: stop the database   -> /readyz turns 503 (liveness stays 200) -> start db -> recovery.
 set -uo pipefail
 cd "$(dirname "$0")/.."
+if [[ -z "${BASE_URL:-}" && -f .env ]]; then
+  PORT=$(grep -E '^HTTPS_PORT=' .env 2>/dev/null | cut -d= -f2 | tr -d '\r" ' || true)
+  [[ -n "$PORT" ]] && BASE_URL="https://localhost:$PORT"
+fi
 BASE_URL="${BASE_URL:-https://localhost:8443}"
 LOG="evidence/drill_$(date -u +%Y%m%dT%H%M%SZ).log"
 exec > >(tee -a "$LOG") 2>&1

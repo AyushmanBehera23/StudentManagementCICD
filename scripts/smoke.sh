@@ -3,6 +3,10 @@
 # Usage: BASE_URL=https://localhost:8443 scripts/smoke.sh
 set -euo pipefail
 cd "$(dirname "$0")/.."
+if [[ -z "${BASE_URL:-}" && -f .env ]]; then
+  PORT=$(grep -E '^HTTPS_PORT=' .env 2>/dev/null | cut -d= -f2 | tr -d '\r" ' || true)
+  [[ -n "$PORT" ]] && BASE_URL="https://localhost:$PORT"
+fi
 BASE_URL="${BASE_URL:-https://localhost:8443}"
 PW="${SEED_PASSWORD:-$(cat secrets/seed_password.txt)}"
 CURL=(curl -sk -o /tmp/smoke_body -w '%{http_code}')
