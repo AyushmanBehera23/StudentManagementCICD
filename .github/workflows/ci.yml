@@ -11,7 +11,8 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
-  contents: read          # least privilege by default; jobs elevate only where needed
+  contents: read
+  packages: write   # build job needs to push to GHCR; other jobs only use read
 
 env:
   IMAGE_NAME: ghcr.io/ayushmanbehera23/studentmanagementcicd
