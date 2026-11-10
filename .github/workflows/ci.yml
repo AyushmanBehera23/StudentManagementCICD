@@ -21,7 +21,7 @@ jobs:
     name: Format, lint, static security
     runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -57,7 +57,7 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://postgres:ci-password@localhost:5432/school_test
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
@@ -77,7 +77,7 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [lint, test]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Prepare environment
         run: |
           cp .env.example .env
@@ -105,7 +105,7 @@ jobs:
     outputs:
       digest: ${{ steps.push.outputs.digest }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: docker/setup-buildx-action@v3
       - id: meta
         uses: docker/metadata-action@v5
