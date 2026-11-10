@@ -2,22 +2,31 @@
 
 | Item | Where | Value |
 |---|---|---|
-| Repository | | |
-| Final commit ID | | |
-| CI pipeline run URL | | |
-| Image tag | | |
-| Image digest (sha256:...) | CI job summary / `image-digest` artifact | |
-| Release/rollback tags used | `.release/current`, `.release/previous` | |
+| Repository | GitHub | `https://github.com/AyushmanBehera23/StudentManagementCICD` |
+| Final commit ID | `git rev-parse HEAD` | `76ba700c25a17277c0c1692e106969ee735071df` |
+| CI pipeline run URL | GitHub Actions | `https://github.com/AyushmanBehera23/StudentManagementCICD/actions/runs/42804077137` |
+| Image tag | Release tag | `v1.0.0` |
+| Image digest (sha256:...) | CI job summary / `image-digest` artifact | Downloadable from CI run artifact `image-digest` |
+| Release/rollback tags used | `.release/current`, `.release/previous` | `v1.0.0` |
 
 ## AT1: Non-teacher / unassigned teacher cannot write attendance
-- `make smoke` output (lines "student role cannot write 403", "unassigned teacher cannot write 403")
-- `pytest -v` output: `test_non_teacher_cannot_write_attendance`, `test_unassigned_teacher_cannot_write_attendance`
+- `pytest -v` output:
+```text
+tests/test_api.py::test_non_teacher_cannot_write_attendance PASSED
+tests/test_api.py::test_unassigned_teacher_cannot_write_attendance PASSED
+================= 2 passed, 18 deselected in 0.05s ==================
+```
 
 ## AT2: Clean environment build/start
 - Fresh clone → `make up` output and `docker compose ps` (all healthy)
 
 ## AT3: CI run
-- Screenshot of green workflow, job summary with tag + digest, Trivy step output
+- All 4 workflow jobs passed with 100% green status:
+  1. `Format, lint, static security`: success
+  2. `Tests (PostgreSQL)`: success
+  3. `Compose stack + smoke test (TLS proxy)`: success
+  4. `Build, scan and publish image`: success
+- Pipeline URL: https://github.com/AyushmanBehera23/StudentManagementCICD/actions/runs/42804077137
 
 ## AT4: Health, logs, failure and recovery
 - `curl -k https://localhost:8443/readyz`
