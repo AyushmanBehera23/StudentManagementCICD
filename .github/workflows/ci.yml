@@ -14,7 +14,7 @@ permissions:
   contents: read          # least privilege by default; jobs elevate only where needed
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}
+  IMAGE_NAME: ghcr.io/ayushmanbehera23/studentmanagementcicd
 
 jobs:
   lint:
