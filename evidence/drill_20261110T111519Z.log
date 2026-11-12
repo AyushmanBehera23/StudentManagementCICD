@@ -1,0 +1,51 @@
+##### baseline
+NAME             IMAGE                                     COMMAND                  SERVICE   CREATED        STATUS                    PORTS
+school-db-1      postgres:16.6-alpine                      "docker-entrypoint.s…"   db        25 hours ago   Up 25 hours (healthy)     5432/tcp
+school-proxy-1   nginxinc/nginx-unprivileged:1.27-alpine   "/docker-entrypoint.…"   proxy     25 hours ago   Up 25 hours (unhealthy)   0.0.0.0:8081->8080/tcp, [::]:8081->8080/tcp, 0.0.0.0:8444->8443/tcp, [::]:8444->8443/tcp
+11:15:20  healthz=000 readyz=502
+
+##### DRILL A: kill app container at 11:15:22
+No container to kill
+11:15:22  healthz=000 readyz=502
+11:15:26  healthz=000 readyz=502
+11:15:30  healthz=000 readyz=502
+--- detection: container state
+NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+--- recovery: docker restart policy brings app back
+11:15:34  healthz=000 readyz=502
+11:15:41  healthz=000 readyz=502
+11:15:48  healthz=000 readyz=502
+11:15:55  healthz=000 readyz=502
+11:16:03  healthz=000 readyz=502
+11:16:10  healthz=000 readyz=502
+11:16:18  healthz=000 readyz=502
+11:16:25  healthz=000 readyz=502
+11:16:32  healthz=000 readyz=502
+11:16:39  healthz=000 readyz=502
+11:16:46  healthz=000 readyz=502
+11:16:54  healthz=000 readyz=502
+11:17:01  healthz=000 readyz=502
+11:17:08  healthz=000 readyz=502
+11:17:15  healthz=000 readyz=502
+11:17:23  healthz=000 readyz=502
+11:17:30  healthz=000 readyz=502
+11:17:37  healthz=000 readyz=502
+11:17:44  healthz=000 readyz=502
+11:17:51  healthz=000 readyz=502
+11:17:59  healthz=000 readyz=502
+11:18:06  healthz=000 readyz=502
+11:18:13  healthz=000 readyz=502
+11:18:21  healthz=000 readyz=502
+11:18:28  healthz=000 readyz=502
+11:18:35  healthz=000 readyz=502
+11:18:42  healthz=000 readyz=502
+11:18:50  healthz=000 readyz=502
+11:18:56  healthz=000 readyz=502
+11:19:03  healthz=000 readyz=502
+11:19:10  healthz=000 readyz=000
+11:19:17  healthz=000 readyz=502
+11:19:25  healthz=000 readyz=502
+11:19:32  healthz=000 readyz=502
+11:19:39  healthz=000 readyz=502
+11:19:47  healthz=000 readyz=502
+11:19:55  healthz=000 readyz=502

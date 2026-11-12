@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>School Attendance Portal</title>
+  <style>
+    /* ── Reset & tokens ───────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --clr-bg:        #f0f4ff;
+      --clr-surface:   #ffffff;
+      --clr-primary:   #1a56db;
+      --clr-primary-h: #1041a8;
+      --clr-danger:    #c0392b;
+      --clr-success:   #16a34a;
+      --clr-warn:      #d97706;
+      --clr-muted:     #6b7280;
+      --clr-border:    #d1d5db;
+      --clr-text:      #111827;
+      --clr-text2:     #374151;
+
+      --radius: .5rem;
+      --shadow: 0 1px 4px rgba(0,0,0,.12);
+      --shadow-lg: 0 8px 32px rgba(0,0,0,.18);
+
+      --sidebar-w: 220px;
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 16px;
+      color: var(--clr-text);
+    }
+
+    body { background: var(--clr-bg); min-height: 100vh; }
+
+    /* ── Typography helpers ──────────────────────────────────── */
+    h1 { font-size: 1.5rem; }
+    h2 { font-size: 1.25rem; margin-block-end: 1rem; }
+    h3 { font-size: 1rem; }
+
+    /* ── Layout ─────────────────────────────────────────────── */
+    #app-shell {
+      display: grid;
+      grid-template-columns: var(--sidebar-w) 1fr;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "header header"
+        "nav    main";
+      min-height: 100vh;
+    }
+
+    /* ── Top bar ─────────────────────────────────────────────── */
+    #topbar {
+      grid-area: header;
+      background: var(--clr-primary);
+      color: #fff;
+      padding: .75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    #topbar h1 { font-size: 1.1rem; letter-spacing: .02em; }
+    #user-badge {
+      display: flex; align-items: center; gap: .5rem;
+      font-size: .875rem;
+    }
+    #user-badge span { opacity: .85; }
+    #btn-logout {
+      background: rgba(255,255,255,.18);
+      border: 1px solid rgba(255,255,255,.35);
+      color: #fff;
+      border-radius: var(--radius);
+      padding: .3rem .75rem;
+      cursor: pointer;
+      font-size: .8rem;
+    }
+    #btn-logout:hover { background: rgba(255,255,255,.28); }
+
+    /* Status dots */
+    .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      display: inline-block; flex-shrink: 0;
+    }
+    .dot.ok  { background: #4ade80; }
+    .dot.err { background: #f87171; }
+    .dot.unk { background: #facc15; }
+
+    /* ── Sidebar nav ─────────────────────────────────────────── */
+    #sidebar {
+      grid-area: nav;
+      background: var(--clr-surface);
+      border-right: 1px solid var(--clr-border);
+      padding: 1.25rem 0;
+    }
+    #sidebar nav { display: flex; flex-direction: column; gap: .25rem; padding: 0 .75rem; }
+    .nav-item {
+      display: flex; align-items: center; gap: .625rem;
+      padding: .6rem .75rem;
+      border-radius: var(--radius);
+      cursor: pointer;
+      font-size: .9rem;
+      color: var(--clr-text2);
+      transition: background .15s;
+      border: none; background: none; width: 100%; text-align: left;
+      user-select: none;
+    }
+    .nav-item:hover  { background: var(--clr-bg); }
+    .nav-item.active { background: #eff6ff; color: var(--clr-primary); font-weight: 600; }
+    .nav-icon { font-size: 1.1rem; }
+
+    /* ── Main content ────────────────────────────────────────── */
+    #main {
+      grid-area: main;
+      padding: 1.75rem;
+      overflow-y: auto;
+    }
+
+    /* ── Cards ───────────────────────────────────────────────── */
+    .card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .card + .card { margin-block-start: 1rem; }
+
+    /* ── Stat grid ───────────────────────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem;
+      margin-block-end: 1.25rem;
+    }
+    .stat-card {
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .stat-card .label { font-size: .78rem; color: var(--clr-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .stat-card .value { font-size: 2rem; font-weight: 700; margin-block: .25rem; }
+    .stat-card .sub   { font-size: .8rem; color: var(--clr-muted); }
+
+    /* ── Tables ──────────────────────────────────────────────── */
+    .tbl-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--clr-border); }
+    table { border-collapse: collapse; width: 100%; font-size: .875rem; }
+    thead th {
+      background: #f9fafb;
+      padding: .6rem .9rem;
+      text-align: left;
+      font-weight: 600;
+      border-bottom: 2px solid var(--clr-border);
+      white-space: nowrap;
+    }
+    tbody tr:nth-child(even) { background: #f9fafb; }
+    tbody tr:hover { background: #eff6ff; }
+    td { padding: .55rem .9rem; border-bottom: 1px solid var(--clr-border); vertical-align: middle; }
+    tbody tr:last-child td { border-bottom: none; }
+
+    /* ── Badges ─────────────────────────────────────────────── */
+    .badge {
+      display: inline-block;
+      padding: .15rem .55rem;
+      border-radius: 999px;
+      font-size: .75rem;
+      font-weight: 600;
+      text-transform: capitalize;
+    }
+    .badge-present  { background: #dcfce7; color: #15803d; }
+    .badge-absent   { background: #fee2e2; color: #b91c1c; }
+    .badge-late     { background: #fef9c3; color: #92400e; }
+    .badge-success  { background: #dcfce7; color: #15803d; }
+    .badge-denied   { background: #fee2e2; color: #b91c1c; }
+    .badge-conflict { background: #fef9c3; color: #92400e; }
+    .badge-rejected { background: #fce7f3; color: #9d174d; }
+    .badge-admin    { background: #ede9fe; color: #5b21b6; }
+    .badge-teacher  { background: #dbeafe; color: #1d4ed8; }
+    .badge-student  { background: #d1fae5; color: #065f46; }
+    .badge-ready    { background: #dcfce7; color: #15803d; }
+    .badge-unavailable { background: #fee2e2; color: #b91c1c; }
+
+    /* ── Forms ───────────────────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: .3rem; margin-block-end: 1rem; }
+    label  { font-size: .875rem; font-weight: 500; }
+    input, select {
+      font: inherit;
+      font-size: max(1rem, 1em);
+      padding: .6rem .75rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      min-height: 42px;
+      width: 100%;
+      background: var(--clr-surface);
+      color: var(--clr-text);
+    }
+    input:focus-visible, select:focus-visible {
+      outline: 3px solid var(--clr-primary);
+      outline-offset: 2px;
+    }
+    input:user-invalid, select:user-invalid { border-color: var(--clr-danger); }
+    .hint { font-size: .78rem; color: var(--clr-muted); }
+    .error-msg { font-size: .8rem; color: var(--clr-danger); min-height: 1.1rem; }
+
+    /* ── Buttons ─────────────────────────────────────────────── */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
+      padding: .6rem 1.2rem;
+      border-radius: var(--radius);
+      border: none;
+      cursor: pointer;
+      font: inherit;
+      font-size: .9rem;
+      font-weight: 600;
+      min-height: 42px;
+      transition: background .15s, opacity .15s;
+    }
+    .btn:disabled { opacity: .5; cursor: not-allowed; }
+    .btn-primary  { background: var(--clr-primary);  color: #fff; }
+    .btn-primary:hover:not(:disabled)  { background: var(--clr-primary-h); }
+    .btn-danger   { background: var(--clr-danger);   color: #fff; }
+    .btn-danger:hover:not(:disabled)   { background: #a93226; }
+    .btn-ghost    { background: transparent; border: 1px solid var(--clr-border); color: var(--clr-text2); }
+    .btn-ghost:hover:not(:disabled)    { background: var(--clr-bg); }
+    .btn-sm { padding: .35rem .75rem; font-size: .8rem; min-height: 32px; }
+    .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-block-start: .5rem; }
+
+    /* ── Alerts ─────────────────────────────────────────────── */
+    .alert {
+      padding: .75rem 1rem;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      border: 1px solid transparent;
+      display: flex; align-items: flex-start; gap: .5rem;
+      margin-block: .75rem;
+    }
+    .alert-info  { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
+    .alert-ok    { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
+    .alert-err   { background: #fef2f2; border-color: #fecaca; color: #b91c1c; }
+    .alert-warn  { background: #fffbeb; border-color: #fde68a; color: #92400e; }
+    .alert[hidden] { display: none; }
+
+    /* ── Dialog ──────────────────────────────────────────────── */
+    dialog {
+      border: none;
+      border-radius: .75rem;
+      box-shadow: var(--shadow-lg);
+      padding: 1.75rem;
+      max-width: min(560px, calc(100vw - 2rem));
+      width: 100%;
+    }
+    dialog::backdrop { background: rgba(0,0,0,.45); }
+    .dialog-title { font-size: 1.15rem; font-weight: 700; margin-block-end: 1.25rem; }
+    .dialog-actions { display: flex; justify-content: flex-end; gap: .75rem; margin-block-start: 1.25rem; }
+
+    /* ── Login screen ────────────────────────────────────────── */
+    #login-screen {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #1a56db 0%, #1041a8 100%);
+    }
+    .login-box {
+      background: var(--clr-surface);
+      border-radius: 1rem;
+      padding: 2.5rem 2rem;
+      width: min(400px, calc(100vw - 2rem));
+      box-shadow: var(--shadow-lg);
+    }
+    .login-box .logo { font-size: 2rem; text-align: center; margin-block-end: .5rem; }
+    .login-box h1   { text-align: center; margin-block-end: .25rem; font-size: 1.3rem; }
+    .login-box .sub { text-align: center; color: var(--clr-muted); font-size: .875rem; margin-block-end: 1.75rem; }
+
+    /* ── Health bar ─────────────────────────────────────────── */
+    .health-bar {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      padding: .75rem 1rem;
+      background: var(--clr-surface);
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      margin-block-end: 1.25rem;
+      align-items: center;
+      font-size: .825rem;
+    }
+    .health-item { display: flex; align-items: center; gap: .4rem; }
+    .health-sep  { color: var(--clr-border); }
+
+    /* ── Section header row ─────────────────────────────────── */
+    .section-hdr {
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: .5rem;
+      margin-block-end: 1rem;
+    }
+
+    /* ── Spinner ─────────────────────────────────────────────── */
+    .spinner {
+      width: 20px; height: 20px;
+      border: 3px solid #d1d5db;
+      border-top-color: var(--clr-primary);
+      border-radius: 50%;
+      animation: spin .6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── Empty state ─────────────────────────────────────────── */
+    .empty { text-align: center; padding: 3rem 1rem; color: var(--clr-muted); }
+    .empty .icon { font-size: 2.5rem; }
+
+    /* ── Toast ───────────────────────────────────────────────── */
+    #toast-rack {
+      position: fixed; bottom: 1.25rem; right: 1.25rem;
+      display: flex; flex-direction: column; gap: .5rem;
+      z-index: 9999;
+    }
+    .toast {
+      background: #1f2937;
+      color: #fff;
+      padding: .7rem 1rem;
+      border-radius: var(--radius);
+      font-size: .875rem;
+      box-shadow: var(--shadow-lg);
+      animation: slideIn .2s ease;
+      max-width: 320px;
+    }
+    .toast.success { background: #15803d; }
+    .toast.error   { background: var(--clr-danger); }
+    .toast.warn    { background: var(--clr-warn); }
+    @keyframes slideIn { from { opacity:0; transform: translateY(8px); } }
+
+    /* ── Attendance grid ─────────────────────────────────────── */
+    .att-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: .75rem;
+      margin-block-end: 1rem;
+    }
+    .att-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      align-items: center;
+      gap: .5rem;
+      padding: .5rem .75rem;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      background: var(--clr-surface);
+    }
+    .att-row .s-name { font-size: .875rem; }
+    .att-row .s-roll { font-size: .75rem; color: var(--clr-muted); }
+    .att-row select  { width: auto; min-height: 36px; padding: .3rem .5rem; font-size: .8rem; }
+
+    /* ── Responsive collapse ─────────────────────────────────── */
+    @media (max-width: 680px) {
+      #app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "nav"
+          "main";
+      }
+      #sidebar { border-right: none; border-bottom: 1px solid var(--clr-border); }
+      #sidebar nav { flex-direction: row; flex-wrap: wrap; padding: .5rem; }
+      .nav-item { flex: 0 0 auto; }
+    }
+
+    /* ── Tabs ────────────────────────────────────────────────── */
+    .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--clr-border); margin-block-end: 1.25rem; }
+    .tab-btn {
+      padding: .5rem 1rem;
+      font: inherit;
+      font-size: .875rem;
+      font-weight: 500;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -2px;
+      color: var(--clr-muted);
+    }
+    .tab-btn.active { color: var(--clr-primary); border-bottom-color: var(--clr-primary); font-weight: 700; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    /* ── Filter row ──────────────────────────────────────────── */
+    .filter-row {
+      display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end;
+      margin-block-end: 1rem;
+    }
+    .filter-row .field { margin-block-end: 0; min-width: 160px; flex: 1 1 160px; }
+
+    /* ── Metrics row ─────────────────────────────────────────── */
+    .metric-pre {
+      font-family: ui-monospace, monospace;
+      font-size: .78rem;
+      white-space: pre;
+      overflow-x: auto;
+      background: #f9fafb;
+      border: 1px solid var(--clr-border);
+      border-radius: var(--radius);
+      padding: .75rem 1rem;
+      max-height: 320px;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════
+     LOGIN SCREEN
+══════════════════════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="logo">🏫</div>
+    <h1>School Attendance Portal</h1>
+    <p class="sub">Sign in to continue</p>
+
+    <form id="login-form" aria-labelledby="login-heading" novalidate>
+      <div class="field">
+        <label for="inp-user">Username <span aria-hidden="true">*</span></label>
+        <input id="inp-user" name="username" type="text"
+               autocomplete="username"
+               autocorrect="off" autocapitalize="none" spellcheck="false"
+               enterkeyhint="next" required minlength="1" maxlength="50"
+               aria-describedby="login-err" />
+      </div>
+      <div class="field">
+        <label for="inp-pass">Password <span aria-hidden="true">*</span></label>
+        <input id="inp-pass" name="password" type="password"
+               autocomplete="current-password"
+               enterkeyhint="done" required minlength="1" maxlength="200"
+               aria-describedby="login-err" />
+        <span class="hint">Try: admin1 / teacher_a / teacher_b / student1</span>
+      </div>
+      <div class="error-msg" id="login-err" aria-live="polite"></div>
+      <button class="btn btn-primary" type="submit" id="login-btn" style="width:100%;margin-top:.5rem">
+        Sign in
+      </button>
+    </form>
+
+    <p style="margin-top:1rem;font-size:.78rem;color:var(--clr-muted);text-align:center;">
+      Configured to connect to <span id="api-url-hint"></span>
+    </p>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MAIN APP SHELL (hidden until logged in)
+══════════════════════════════════════════════════════════ -->
+<div id="app-shell" hidden>
+
+  <!-- Top bar -->
+  <header id="topbar" role="banner">
+    <h1>🏫 School Attendance Portal</h1>
+    <div id="user-badge">
+      <span id="topbar-user"></span>
+      <button class="btn" id="btn-logout" type="button">Logout</button>
+    </div>
+  </header>
+
+  <!-- Sidebar -->
+  <div id="sidebar" role="complementary" aria-label="Navigation">
+    <nav aria-label="Primary navigation">
+      <button class="nav-item active" data-page="dashboard" type="button">
+        <span class="nav-icon" aria-hidden="true">📊</span> Dashboard
+      </button>
+      <button class="nav-item" data-page="classes" type="button">
+        <span class="nav-icon" aria-hidden="true">🏛️</span> Classes
+      </button>
+      <button class="nav-item" data-page="attendance" type="button">
+        <span class="nav-icon" aria-hidden="true">✅</span> Record Attendance
+      </button>
+      <button class="nav-item" data-page="view-attendance" type="button">
+        <span class="nav-icon" aria-hidden="true">📋</span> View Attendance
+      </button>
+      <button class="nav-item" data-page="audit" type="button" id="nav-audit">
+        <span class="nav-icon" aria-hidden="true">🔍</span> Audit Log
+      </button>
+      <button class="nav-item" data-page="ops" type="button">
+        <span class="nav-icon" aria-hidden="true">⚙️</span> Health &amp; Ops
+      </button>
+    </nav>
+  </div>
+
+  <!-- Main content area -->
+  <main id="main" role="main">
+
+    <!-- ── DASHBOARD ── -->
+    <section id="page-dashboard" aria-labelledby="dash-heading">
+      <div class="section-hdr">
+        <h2 id="dash-heading">Dashboard</h2>
+        <button class="btn btn-ghost btn-sm" id="btn-refresh-dash" type="button">🔄 Refresh</button>
+      </div>
+
+      <div class="health-bar" id="dash-health">
+        <span class="health-item"><span class="dot unk" id="hc-liveness"></span> Liveness</span>
+        <span class="health-sep">|</span>
+        <span class="health-item"><span class="dot unk" id="hc-readiness"></span> Readiness / DB</span>
+        <span class="health-sep">|</span>
+        <span class="health-item" id="hc-ver" style="color:var(--clr-muted);font-size:.8rem"></span>
+      </div>
+
+      <div class="stat-grid" id="dash-stats">
+        <div class="stat-card"><div class="label">Classes</div><div class="value" id="stat-classes">—</div><div class="sub">total</div></div>
+        <div class="stat-card"><div class="label">Students (enrolled)</div><div class="value" id="stat-students">—</div><div class="sub">across all classes</div></div>
+        <div class="stat-card"><div class="label">Attendance records</div><div class="value" id="stat-att">—</div><div class="sub">loaded classes</div></div>
+        <div class="stat-card"><div class="label">Your role</div><div class="value" id="stat-role" style="font-size:1.3rem">—</div><div class="sub" id="stat-user"></div></div>
+      </div>
+
+      <div class="card">
+        <h3 style="margin-block-end:.75rem">Your Classes</h3>
+        <div id="dash-classes-list">
+          <div class="empty"><div class="spinner"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── CLASSES ── -->
+    <section id="page-classes" hidden aria-labelledby="cls-heading">
+      <div class="section-hdr">
+        <h2 id="cls-heading">Classes &amp; Students</h2>
+        <button class="btn btn-ghost btn-sm" id="btn-refresh-classes" type="button">🔄 Refresh</button>
+      </div>
+      <div id="classes-container">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <!-- ── RECORD ATTENDANCE ── -->
+    <section id="page-attendance" hidden aria-labelledby="att-rec-heading">
+      <h2 id="att-rec-heading">Record Attendance</h2>
+
+      <div class="card" style="margin-block-end:1rem">
+        <form id="att-form" aria-labelledby="att-rec-heading" novalidate>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem">
+            <div class="field">
+              <label for="att-class">Class <span aria-hidden="true">*</span></label>
+              <select id="att-class" name="class_id" required aria-describedby="att-form-err">
+                <option value="">— select class —</option>
+              </select>
+            </div>
+            <div class="field">
+              <label for="att-date">Date <span aria-hidden="true">*</span></label>
+              <input id="att-date" name="date" type="date" required aria-describedby="att-form-err" />
+            </div>
+            <div class="field">
+              <label for="att-session">Session <span aria-hidden="true">*</span></label>
+              <select id="att-session" name="session" required aria-describedby="att-form-err">
+                <option value="">— select —</option>
+                <option value="morning">Morning</option>
+                <option value="afternoon">Afternoon</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-ghost" id="btn-load-students" type="button">Load Students</button>
+        </form>
+      </div>
+
+      <div id="att-students-panel" hidden>
+        <div class="section-hdr" style="margin-block-end:.5rem">
+          <h3>Mark attendance</h3>
+          <div style="display:flex;gap:.5rem">
+            <button class="btn btn-ghost btn-sm" id="btn-mark-all-present" type="button">All Present</button>
+            <button class="btn btn-ghost btn-sm" id="btn-mark-all-absent"  type="button">All Absent</button>
+          </div>
+        </div>
+        <div class="att-grid" id="att-grid"></div>
+        <div class="error-msg" id="att-form-err" aria-live="polite" style="margin-block-end:.5rem"></div>
+        <button class="btn btn-primary" id="btn-submit-att" type="button">Submit Attendance</button>
+      </div>
+
+      <div id="att-teacher-warn" class="alert alert-warn" hidden>
+        ⚠️ Only teachers assigned to a class can record attendance. Admins and students cannot submit attendance.
+      </div>
+    </section>
+
+    <!-- ── VIEW ATTENDANCE ── -->
+    <section id="page-view-attendance" hidden aria-labelledby="view-att-heading">
+      <div class="section-hdr">
+        <h2 id="view-att-heading">View Attendance</h2>
+        <button class="btn btn-ghost btn-sm" id="btn-refresh-view-att" type="button">🔄 Refresh</button>
+      </div>
+
+      <div class="card" style="margin-block-end:1rem">
+        <div class="filter-row">
+          <div class="field">
+            <label for="vatt-class">Class</label>
+            <select id="vatt-class">
+              <option value="">— all classes —</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="vatt-date">Date (optional)</label>
+            <input id="vatt-date" type="date" />
+          </div>
+          <button class="btn btn-primary" id="btn-load-att" type="button" style="align-self:flex-end">Load</button>
+        </div>
+      </div>
+
+      <div id="view-att-container">
+        <div class="empty"><span class="icon">📋</span><p style="margin-top:.5rem">Select a class and click Load</p></div>
+      </div>
+    </section>
+
+    <!-- ── AUDIT LOG ── -->
+    <section id="page-audit" hidden aria-labelledby="audit-heading">
+      <div class="section-hdr">
+        <h2 id="audit-heading">Audit Log</h2>
+        <div style="display:flex;gap:.5rem;align-items:center">
+          <label for="audit-limit" style="font-size:.875rem">Limit:</label>
+          <select id="audit-limit" style="width:auto;min-width:80px;min-height:36px;padding:.3rem .5rem;font-size:.875rem">
+            <option value="50">50</option>
+            <option value="100" selected>100</option>
+            <option value="200">200</option>
+            <option value="500">500</option>
+          </select>
+          <button class="btn btn-ghost btn-sm" id="btn-refresh-audit" type="button">🔄 Refresh</button>
+        </div>
+      </div>
+
+      <div id="audit-admin-only" class="alert alert-warn" hidden>
+        ⚠️ Audit log is only visible to admins.
+      </div>
+
+      <div id="audit-container">
+        <div class="empty"><div class="spinner"></div></div>
+      </div>
+    </section>
+
+    <!-- ── HEALTH & OPS ── -->
+    <section id="page-ops" hidden aria-labelledby="ops-heading">
+      <div class="section-hdr">
+        <h2 id="ops-heading">Health &amp; Operations</h2>
+        <button class="btn btn-ghost btn-sm" id="btn-refresh-ops" type="button">🔄 Refresh</button>
+      </div>
+
+      <div class="tabs" role="tablist" aria-label="Ops tabs">
+        <button role="tab" class="tab-btn active" data-tab="tab-health" type="button">Health</button>
+        <button role="tab" class="tab-btn" data-tab="tab-metrics" type="button">Metrics</button>
+      </div>
+
+      <div class="tab-panel active" id="tab-health">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-block-end:1rem">
+          <div class="card" id="ops-liveness-card">
+            <h3>🫀 Liveness <code>/healthz</code></h3>
+            <div id="ops-liveness-body" style="margin-top:.75rem"><div class="spinner"></div></div>
+          </div>
+          <div class="card" id="ops-readiness-card">
+            <h3>🩺 Readiness <code>/readyz</code></h3>
+            <div id="ops-readiness-body" style="margin-top:.75rem"><div class="spinner"></div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3 style="margin-block-end:.75rem">Response log</h3>
+          <div id="ops-log" class="metric-pre" style="font-size:.75rem;min-height:60px"></div>
+        </div>
+      </div>
+
+      <div class="tab-panel" id="tab-metrics">
+        <div class="card">
+          <div class="section-hdr" style="margin-block-end:.75rem">
+            <h3>Prometheus metrics <code>/metrics</code></h3>
+            <button class="btn btn-ghost btn-sm" id="btn-load-metrics" type="button">Load metrics</button>
+          </div>
+          <div id="metrics-body" class="metric-pre">Click "Load metrics" to fetch.</div>
+        </div>
+      </div>
+    </section>
+
+  </main><!-- /#main -->
+</div><!-- /#app-shell -->
+
+<!-- ══════════════════════════════════════════════════════════
+     DIALOGS
+══════════════════════════════════════════════════════════ -->
+
+<!-- Students dialog -->
+<dialog id="dlg-students" aria-labelledby="dlg-students-title">
+  <h2 class="dialog-title" id="dlg-students-title">Students in class</h2>
+  <div id="dlg-students-body"><div class="spinner"></div></div>
+  <div class="dialog-actions">
+    <button class="btn btn-ghost" id="dlg-students-close" type="button">Close</button>
+  </div>
+</dialog>
+
+<!-- Toast rack -->
+<div id="toast-rack" aria-live="polite" aria-atomic="false"></div>
+
+<!-- ══════════════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════════════ -->
+<script>
+"use strict";
+
+// ── Config ──────────────────────────────────────────────────
+// Auto-detect API base: same host but without /frontend path
+const API = (() => {
+  const h = location.hostname;
+  const https_port = 8443; // default; adjust if your .env uses a different HTTPS_PORT
+  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
+    return `https://${h}:${https_port}`;
+  }
+  return `${location.protocol}//${location.host}`;
+})();
+document.getElementById('api-url-hint').textContent = API;
+
+// ── State ───────────────────────────────────────────────────
+let token = sessionStorage.getItem('token') || null;
+let currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
+let classCache  = [];   // list of ClassOut objects
+
+// ── Toast ────────────────────────────────────────────────────
+function toast(msg, kind = 'info') {
+  const rack = document.getElementById('toast-rack');
+  const el = document.createElement('div');
+  el.className = `toast ${kind}`;
+  el.textContent = msg;
+  rack.appendChild(el);
+  setTimeout(() => el.remove(), 3500);
+}
+
+// ── API helpers ──────────────────────────────────────────────
+async function apiFetch(path, opts = {}) {
+  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
+  if (token) headers['Authorization'] = `Bearer ${token}`;
+  const r = await fetch(API + path, { ...opts, headers });
+  if (r.status === 401) { logout(); throw new Error('Session expired'); }
+  return r;
+}
+
+async function apiJSON(path, opts = {}) {
+  const r = await apiFetch(path, opts);
+  const json = await r.json().catch(() => ({}));
+  if (!r.ok) {
+    const msg = json?.detail?.error || json?.detail || `HTTP ${r.status}`;
+    throw Object.assign(new Error(typeof msg === 'string' ? msg : JSON.stringify(msg)), { status: r.status, json });
+  }
+  return json;
+}
+
+// ── Auth ─────────────────────────────────────────────────────
+function logout() {
+  token = null; currentUser = null;
+  sessionStorage.removeItem('token');
+  sessionStorage.removeItem('user');
+  document.getElementById('app-shell').hidden = true;
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('inp-user').focus();
+}
+
+function applyUser(u) {
+  currentUser = u;
+  document.getElementById('topbar-user').textContent = `${u.username} (${u.role})`;
+  const statRole = document.getElementById('stat-role');
+  statRole.innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
+  document.getElementById('stat-user').textContent = u.username;
+  // Audit nav only for admin
+  document.getElementById('nav-audit').hidden = (u.role !== 'admin');
+}
+
+// ── Login form ────────────────────────────────────────────────
+const loginForm = document.getElementById('login-form');
+loginForm.addEventListener('submit', async e => {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const errEl = document.getElementById('login-err');
+  errEl.textContent = '';
+  btn.disabled = true;
+  btn.textContent = 'Signing in…';
+  try {
+    const username = document.getElementById('inp-user').value.trim();
+    const password = document.getElementById('inp-pass').value;
+    const data = await apiJSON('/auth/login', {
+      method: 'POST',
+      body: JSON.stringify({ username, password }),
+    });
+    token = data.access_token;
+    // Decode JWT payload (no verification – UI only)
+    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
+    const user = { username: payload.sub, role: payload.role };
+    sessionStorage.setItem('token', token);
+    sessionStorage.setItem('user', JSON.stringify(user));
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app-shell').hidden = false;
+    applyUser(user);
+    navigateTo('dashboard');
+    toast(`Welcome back, ${user.username}!`, 'success');
+  } catch(err) {
+    errEl.textContent = err.message || 'Login failed';
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Sign in';
+  }
+});
+
+document.getElementById('btn-logout').addEventListener('click', logout);
+
+// ── Navigation ────────────────────────────────────────────────
+const pages = document.querySelectorAll('#main > section');
+const navItems = document.querySelectorAll('.nav-item');
+
+function navigateTo(page) {
+  pages.forEach(p => p.hidden = (p.id !== `page-${page}`));
+  navItems.forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  pageHandlers[page]?.();
+}
+
+navItems.forEach(n => n.addEventListener('click', () => navigateTo(n.dataset.page)));
+
+// ── Page: Dashboard ──────────────────────────────────────────
+async function loadDashboard() {
+  checkHealth();
+  loadDashClasses();
+}
+
+async function checkHealth() {
+  const dots = { liveness: document.getElementById('hc-liveness'), readiness: document.getElementById('hc-readiness') };
+  const verEl = document.getElementById('hc-ver');
+
+  try {
+    const r = await apiFetch('/healthz');
+    const j = await r.json();
+    dots.liveness.className = `dot ${r.ok ? 'ok' : 'err'}`;
+    verEl.textContent = `v${j.version || '?'}`;
+  } catch { dots.liveness.className = 'dot err'; }
+
+  try {
+    const r = await apiFetch('/readyz');
+    dots.readiness.className = `dot ${r.ok ? 'ok' : 'err'}`;
+  } catch { dots.readiness.className = 'dot err'; }
+}
+
+async function loadDashClasses() {
+  const listEl = document.getElementById('dash-classes-list');
+  try {
+    const classes = await apiJSON('/classes');
+    classCache = classes;
+    document.getElementById('stat-classes').textContent  = classes.length;
+    const totalStudents = classes.reduce((s, c) => s + c.student_count, 0);
+    document.getElementById('stat-students').textContent = totalStudents;
+
+    // Count total attendance records across classes
+    let totalAtt = 0;
+    if (classes.length > 0) {
+      const attCounts = await Promise.allSettled(
+        classes.map(c => apiJSON(`/classes/${c.id}/attendance`).then(a => a.length))
+      );
+      totalAtt = attCounts.reduce((s, r) => s + (r.status === 'fulfilled' ? r.value : 0), 0);
+    }
+    document.getElementById('stat-att').textContent = totalAtt;
+
+    if (classes.length === 0) {
+      listEl.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes found.</p></div>';
+      return;
+    }
+
+    listEl.innerHTML = '';
+    const tbl = document.createElement('div');
+    tbl.className = 'tbl-wrap';
+    tbl.innerHTML = `
+      <table>
+        <thead><tr>
+          <th scope="col">ID</th>
+          <th scope="col">Class</th>
+          <th scope="col">Teacher</th>
+          <th scope="col">Students</th>
+          <th scope="col">Actions</th>
+        </tr></thead>
+        <tbody>
+          ${classes.map(c => `
+            <tr>
+              <td>${c.id}</td>
+              <td><strong>${esc(c.name)}</strong></td>
+              <td>${esc(c.teacher)}</td>
+              <td>${c.student_count}</td>
+              <td>
+                <button class="btn btn-ghost btn-sm" onclick="showStudentsDialog(${c.id},'${esc(c.name)}')" type="button">View Students</button>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>`;
+    listEl.appendChild(tbl);
+    populateClassSelects(classes);
+  } catch(err) {
+    listEl.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+document.getElementById('btn-refresh-dash').addEventListener('click', loadDashboard);
+
+// ── Page: Classes ─────────────────────────────────────────────
+async function loadClasses() {
+  const container = document.getElementById('classes-container');
+  container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  try {
+    const classes = await apiJSON('/classes');
+    classCache = classes;
+    if (classes.length === 0) {
+      container.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes visible for your role.</p></div>';
+      return;
+    }
+    container.innerHTML = '';
+    for (const cls of classes) {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.marginBlockEnd = '1rem';
+      card.innerHTML = `
+        <div class="section-hdr">
+          <div>
+            <strong style="font-size:1rem">${esc(cls.name)}</strong>
+            <span style="margin-left:.5rem;color:var(--clr-muted);font-size:.85rem">Teacher: ${esc(cls.teacher)}</span>
+          </div>
+          <span class="badge badge-teacher">${cls.student_count} students</span>
+        </div>
+        <div id="students-${cls.id}"><div class="empty" style="padding:1rem"><div class="spinner"></div></div></div>`;
+      container.appendChild(card);
+      loadStudentsInto(cls.id, `students-${cls.id}`);
+    }
+    populateClassSelects(classes);
+  } catch(err) {
+    container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+async function loadStudentsInto(classId, containerId) {
+  const el = document.getElementById(containerId);
+  try {
+    const students = await apiJSON(`/classes/${classId}/students`);
+    if (students.length === 0) { el.innerHTML = '<p style="color:var(--clr-muted);font-size:.875rem;padding:.5rem">No students enrolled.</p>'; return; }
+    el.innerHTML = `
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Roll No</th><th scope="col">Full Name</th><th scope="col">ID</th></tr></thead>
+          <tbody>
+            ${students.map(s => `<tr><td><code>${esc(s.roll_no)}</code></td><td>${esc(s.full_name)}</td><td>${s.id}</td></tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch(err) {
+    el.innerHTML = `<span class="alert alert-err" style="display:inline-block;padding:.4rem .75rem;font-size:.8rem">⚠️ ${esc(err.message)}</span>`;
+  }
+}
+
+document.getElementById('btn-refresh-classes').addEventListener('click', loadClasses);
+
+// ── Students dialog ───────────────────────────────────────────
+async function showStudentsDialog(classId, className) {
+  const dlg   = document.getElementById('dlg-students');
+  const title = document.getElementById('dlg-students-title');
+  const body  = document.getElementById('dlg-students-body');
+  title.textContent = `Students – ${className}`;
+  body.innerHTML = '<div class="spinner"></div>';
+  dlg.showModal();
+  try {
+    const students = await apiJSON(`/classes/${classId}/students`);
+    if (students.length === 0) { body.innerHTML = '<p>No students enrolled.</p>'; return; }
+    body.innerHTML = `
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Roll No</th><th scope="col">Name</th><th scope="col">ID</th></tr></thead>
+          <tbody>${students.map(s => `<tr><td><code>${esc(s.roll_no)}</code></td><td>${esc(s.full_name)}</td><td>${s.id}</td></tr>`).join('')}</tbody>
+        </table>
+      </div>`;
+  } catch(err) {
+    body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+// Close dialog on backdrop click (light dismiss)
+const dlgStudents = document.getElementById('dlg-students');
+dlgStudents.addEventListener('click', e => { if (e.target === dlgStudents) dlgStudents.close(); });
+document.getElementById('dlg-students-close').addEventListener('click', () => dlgStudents.close());
+
+// ── Page: Record Attendance ───────────────────────────────────
+let currentStudents = [];
+
+function loadAttendancePage() {
+  const user = currentUser;
+  const warn = document.getElementById('att-teacher-warn');
+  warn.hidden = (user?.role === 'teacher');
+
+  // set today's date as default
+  const dateIn = document.getElementById('att-date');
+  if (!dateIn.value) dateIn.value = new Date().toISOString().slice(0, 10);
+
+  // populate class dropdown
+  populateAttClassSelect();
+}
+
+function populateAttClassSelect() {
+  const sel = document.getElementById('att-class');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— select class —</option>';
+  classCache.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = `${c.name} (${c.teacher})`;
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+document.getElementById('btn-load-students').addEventListener('click', async () => {
+  const classId = document.getElementById('att-class').value;
+  const date    = document.getElementById('att-date').value;
+  const session = document.getElementById('att-session').value;
+  const errEl   = document.getElementById('att-form-err');
+  errEl.textContent = '';
+
+  if (!classId || !date || !session) {
+    errEl.textContent = 'Please select a class, date and session.';
+    return;
+  }
+
+  const panel = document.getElementById('att-students-panel');
+  panel.hidden = true;
+  const grid  = document.getElementById('att-grid');
+  grid.innerHTML = '<div class="spinner"></div>';
+
+  try {
+    const students = await apiJSON(`/classes/${classId}/students`);
+    currentStudents = students;
+    if (students.length === 0) { errEl.textContent = 'No students in this class.'; return; }
+
+    grid.innerHTML = '';
+    students.forEach(s => {
+      const row = document.createElement('div');
+      row.className = 'att-row';
+      row.dataset.sid = s.id;
+      row.innerHTML = `
+        <div>
+          <div class="s-name">${esc(s.full_name)}</div>
+          <div class="s-roll">${esc(s.roll_no)}</div>
+        </div>
+        <select aria-label="Status for ${esc(s.full_name)}" name="status-${s.id}">
+          <option value="present">Present</option>
+          <option value="absent">Absent</option>
+          <option value="late">Late</option>
+        </select>`;
+      grid.appendChild(row);
+    });
+    panel.hidden = false;
+  } catch(err) {
+    errEl.textContent = err.message;
+  }
+});
+
+document.getElementById('btn-mark-all-present').addEventListener('click', () =>
+  document.querySelectorAll('#att-grid select').forEach(s => s.value = 'present'));
+document.getElementById('btn-mark-all-absent').addEventListener('click', () =>
+  document.querySelectorAll('#att-grid select').forEach(s => s.value = 'absent'));
+
+document.getElementById('btn-submit-att').addEventListener('click', async () => {
+  const btn     = document.getElementById('btn-submit-att');
+  const errEl   = document.getElementById('att-form-err');
+  const classId = document.getElementById('att-class').value;
+  const date    = document.getElementById('att-date').value;
+  const session = document.getElementById('att-session').value;
+  errEl.textContent = '';
+
+  const records = currentStudents.map(s => {
+    const sel = document.querySelector(`#att-grid select[name="status-${s.id}"]`);
+    return { student_id: s.id, status: sel ? sel.value : 'present' };
+  });
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  try {
+    const result = await apiJSON(`/classes/${classId}/attendance`, {
+      method: 'POST',
+      body: JSON.stringify({ date, session, records }),
+    });
+    toast(`✅ Recorded ${result.recorded} attendance entries for ${result.date} (${result.session})`, 'success');
+    document.getElementById('att-students-panel').hidden = true;
+    document.getElementById('att-class').value = '';
+    document.getElementById('att-session').value = '';
+  } catch(err) {
+    if (err.status === 409) {
+      errEl.textContent = `Conflict: ${err.json?.detail?.error || err.message}. Attendance already recorded for some/all students on this date/session.`;
+    } else if (err.status === 403) {
+      errEl.textContent = `Forbidden: ${err.message}. Only the assigned teacher can record attendance.`;
+    } else if (err.status === 422) {
+      errEl.textContent = `Validation error: ${err.json?.detail?.error || err.message}`;
+    } else {
+      errEl.textContent = err.message;
+    }
+    toast(errEl.textContent, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Submit Attendance';
+  }
+});
+
+// ── Page: View Attendance ─────────────────────────────────────
+function loadViewAttendancePage() {
+  populateVattClassSelect();
+}
+
+function populateVattClassSelect() {
+  const sel = document.getElementById('vatt-class');
+  const prev = sel.value;
+  sel.innerHTML = '<option value="">— all classes —</option>';
+  classCache.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.id;
+    opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+  if (prev) sel.value = prev;
+}
+
+document.getElementById('btn-load-att').addEventListener('click', loadViewAttendance);
+document.getElementById('btn-refresh-view-att').addEventListener('click', loadViewAttendance);
+
+async function loadViewAttendance() {
+  const classId = document.getElementById('vatt-class').value;
+  const date    = document.getElementById('vatt-date').value;
+  const container = document.getElementById('view-att-container');
+
+  if (!classId) {
+    container.innerHTML = '<div class="alert alert-info">ℹ️ Select a class to view attendance records.</div>';
+    return;
+  }
+
+  container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+  try {
+    let path = `/classes/${classId}/attendance`;
+    if (date) path += `?date=${date}`;
+    const records = await apiJSON(path);
+
+    if (records.length === 0) {
+      container.innerHTML = '<div class="empty"><span class="icon">📋</span><p>No attendance records found.</p></div>';
+      return;
+    }
+
+    // Group by date + session
+    const groups = {};
+    records.forEach(r => {
+      const key = `${r.att_date}|${r.session}`;
+      if (!groups[key]) groups[key] = [];
+      groups[key].push(r);
+    });
+
+    // Summary stats
+    const total  = records.length;
+    const present = records.filter(r => r.status === 'present').length;
+    const absent  = records.filter(r => r.status === 'absent').length;
+    const late    = records.filter(r => r.status === 'late').length;
+
+    container.innerHTML = `
+      <div class="stat-grid" style="margin-block-end:.75rem">
+        <div class="stat-card"><div class="label">Total Records</div><div class="value">${total}</div></div>
+        <div class="stat-card"><div class="label">Present</div><div class="value" style="color:var(--clr-success)">${present}</div></div>
+        <div class="stat-card"><div class="label">Absent</div><div class="value" style="color:var(--clr-danger)">${absent}</div></div>
+        <div class="stat-card"><div class="label">Late</div><div class="value" style="color:var(--clr-warn)">${late}</div></div>
+      </div>`;
+
+    Object.entries(groups).sort(([a],[b]) => b.localeCompare(a)).forEach(([key, rows]) => {
+      const [d, sess] = key.split('|');
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.style.marginBlockEnd = '1rem';
+      card.innerHTML = `
+        <h3 style="margin-block-end:.75rem">📅 ${esc(d)} — <em>${esc(sess)}</em></h3>
+        <div class="tbl-wrap">
+          <table>
+            <thead><tr>
+              <th scope="col">Student ID</th>
+              <th scope="col">Status</th>
+            </tr></thead>
+            <tbody>
+              ${rows.map(r => `
+                <tr>
+                  <td>${r.student_id}</td>
+                  <td><span class="badge badge-${r.status}">${r.status}</span></td>
+                </tr>`).join('')}
+            </tbody>
+          </table>
+        </div>`;
+      container.appendChild(card);
+    });
+  } catch(err) {
+    container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+// ── Page: Audit Log ───────────────────────────────────────────
+async function loadAudit() {
+  const container = document.getElementById('audit-container');
+  const warn      = document.getElementById('audit-admin-only');
+
+  if (currentUser?.role !== 'admin') {
+    warn.hidden = false;
+    container.innerHTML = '';
+    return;
+  }
+  warn.hidden = true;
+  container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
+  const limit = document.getElementById('audit-limit').value;
+  try {
+    const rows = await apiJSON(`/audit?limit=${limit}`);
+    if (rows.length === 0) {
+      container.innerHTML = '<div class="empty"><span class="icon">🔍</span><p>No audit entries yet.</p></div>';
+      return;
+    }
+
+    const outcomes = [...new Set(rows.map(r => r.outcome))];
+    // Count by outcome
+    const counts = {};
+    outcomes.forEach(o => counts[o] = rows.filter(r => r.outcome === o).length);
+
+    container.innerHTML = `
+      <div class="stat-grid" style="margin-block-end:.75rem">
+        ${outcomes.map(o => `
+          <div class="stat-card">
+            <div class="label">${esc(o)}</div>
+            <div class="value">${counts[o]}</div>
+          </div>`).join('')}
+      </div>
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th scope="col">#</th>
+            <th scope="col">Time</th>
+            <th scope="col">Actor</th>
+            <th scope="col">Action</th>
+            <th scope="col">Resource</th>
+            <th scope="col">Outcome</th>
+            <th scope="col">Detail</th>
+          </tr></thead>
+          <tbody>
+            ${rows.map(r => `
+              <tr>
+                <td>${r.id}</td>
+                <td style="white-space:nowrap;font-size:.8rem">${new Date(r.ts).toLocaleString()}</td>
+                <td><code>${esc(r.actor)}</code></td>
+                <td>${esc(r.action)}</td>
+                <td><code style="font-size:.78rem">${esc(r.resource)}</code></td>
+                <td><span class="badge badge-${r.outcome}">${esc(r.outcome)}</span></td>
+                <td style="max-width:260px;font-size:.8rem;word-break:break-word">${esc(r.detail)}</td>
+              </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>`;
+  } catch(err) {
+    container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+document.getElementById('btn-refresh-audit').addEventListener('click', loadAudit);
+document.getElementById('audit-limit').addEventListener('change', loadAudit);
+
+// ── Page: Ops ─────────────────────────────────────────────────
+let opsLog = '';
+function appendOpsLog(msg) {
+  opsLog = `[${new Date().toLocaleTimeString()}] ${msg}\n` + opsLog;
+  document.getElementById('ops-log').textContent = opsLog.slice(0, 4000);
+}
+
+async function loadOps() {
+  await Promise.all([loadLiveness(), loadReadiness()]);
+}
+
+async function loadLiveness() {
+  const body = document.getElementById('ops-liveness-body');
+  body.innerHTML = '<div class="spinner"></div>';
+  try {
+    const r   = await apiFetch('/healthz');
+    const j   = await r.json();
+    const ok  = r.ok;
+    body.innerHTML = `
+      <div class="alert ${ok ? 'alert-ok' : 'alert-err'}" style="margin-block:0">
+        ${ok ? '✅' : '❌'} Status: <strong>${j.status}</strong>
+      </div>
+      <pre style="margin-top:.75rem;font-size:.8rem;background:#f9fafb;padding:.5rem;border-radius:.25rem;overflow:auto">${JSON.stringify(j,null,2)}</pre>`;
+    appendOpsLog(`GET /healthz → ${r.status} ${j.status}`);
+    document.getElementById('hc-liveness').className = `dot ${ok ? 'ok' : 'err'}`;
+    document.getElementById('hc-ver').textContent = `v${j.version || '?'}`;
+  } catch(err) {
+    body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+    appendOpsLog(`GET /healthz → ERROR: ${err.message}`);
+    document.getElementById('hc-liveness').className = 'dot err';
+  }
+}
+
+async function loadReadiness() {
+  const body = document.getElementById('ops-readiness-body');
+  body.innerHTML = '<div class="spinner"></div>';
+  try {
+    const r  = await apiFetch('/readyz');
+    const j  = await r.json();
+    const ok = r.ok;
+    body.innerHTML = `
+      <div class="alert ${ok ? 'alert-ok' : 'alert-err'}" style="margin-block:0">
+        ${ok ? '✅' : '❌'} DB: <strong>${j.database}</strong> — ${j.status}
+      </div>
+      <pre style="margin-top:.75rem;font-size:.8rem;background:#f9fafb;padding:.5rem;border-radius:.25rem;overflow:auto">${JSON.stringify(j,null,2)}</pre>`;
+    appendOpsLog(`GET /readyz → ${r.status} db=${j.database}`);
+    document.getElementById('hc-readiness').className = `dot ${ok ? 'ok' : 'err'}`;
+  } catch(err) {
+    body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
+    appendOpsLog(`GET /readyz → ERROR: ${err.message}`);
+    document.getElementById('hc-readiness').className = 'dot err';
+  }
+}
+
+document.getElementById('btn-refresh-ops').addEventListener('click', loadOps);
+
+document.getElementById('btn-load-metrics').addEventListener('click', async () => {
+  const el = document.getElementById('metrics-body');
+  el.textContent = 'Loading…';
+  try {
+    // /metrics is not behind auth and not exposed via nginx (direct to API)
+    const r = await fetch(API + '/metrics');
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const text = await r.text();
+    el.textContent = text.slice(0, 10000) + (text.length > 10000 ? '\n…(truncated)' : '');
+    appendOpsLog(`GET /metrics → ${r.status} (${text.length} bytes)`);
+  } catch(err) {
+    el.textContent = `Error: ${err.message}\n\nNote: /metrics may not be exposed through the reverse proxy. Connect directly to the app container port if needed.`;
+    appendOpsLog(`GET /metrics → ERROR: ${err.message}`);
+  }
+});
+
+// ── Tabs (ops) ─────────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = btn.dataset.tab;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === target));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === target));
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────────
+function esc(str) {
+  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function populateClassSelects(classes) {
+  // attendance form
+  populateAttClassSelect();
+  // view attendance
+  populateVattClassSelect();
+}
+
+// ── Page handler registry ─────────────────────────────────────
+const pageHandlers = {
+  dashboard:       loadDashboard,
+  classes:         loadClasses,
+  attendance:      loadAttendancePage,
+  'view-attendance': loadViewAttendancePage,
+  audit:           loadAudit,
+  ops:             loadOps,
+};
+
+// ── Auto-restore session on load ──────────────────────────────
+if (token && currentUser) {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app-shell').hidden = false;
+  applyUser(currentUser);
+  navigateTo('dashboard');
+}
+</script>
+</body>
+</html>
