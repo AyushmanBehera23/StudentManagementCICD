@@ -694,15 +694,9 @@
 "use strict";
 
 // ── Config ──────────────────────────────────────────────────
-// Auto-detect API base: same host but without /frontend path
-const API = (() => {
-  const h = location.hostname;
-  const https_port = 8443; // default; adjust if your .env uses a different HTTPS_PORT
-  if (location.hostname === 'localhost' || location.hostname === '127.0.0.1') {
-    return `https://${h}:${https_port}`;
-  }
-  return `${location.protocol}//${location.host}`;
-})();
+// Use the same origin as the page — Nginx proxies /api/* to the app
+// on the same host:port, so there is no CORS issue and no hardcoded port.
+const API = location.origin;   // e.g. https://localhost:8444
 document.getElementById('api-url-hint').textContent = API;
 
 // ── State ───────────────────────────────────────────────────
@@ -1365,3 +1359,4 @@ if (token && currentUser) {
 </script>
 </body>
 </html>
+
