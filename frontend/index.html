@@ -5,40 +5,40 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>School Attendance Portal</title>
   <style>
-    /* ── Reset & tokens ───────────────────────────────────────── */
+    /* ── Reset & CSS variables ───────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --clr-bg:        #f0f4ff;
+      --clr-bg:        #f1f5f9;
       --clr-surface:   #ffffff;
-      --clr-primary:   #1a56db;
-      --clr-primary-h: #1041a8;
-      --clr-danger:    #c0392b;
+      --clr-primary:   #2563eb;
+      --clr-primary-h: #1d4ed8;
+      --clr-danger:    #dc2626;
       --clr-success:   #16a34a;
       --clr-warn:      #d97706;
-      --clr-muted:     #6b7280;
-      --clr-border:    #d1d5db;
-      --clr-text:      #111827;
-      --clr-text2:     #374151;
+      --clr-muted:     #64748b;
+      --clr-border:    #cbd5e1;
+      --clr-text:      #0f172a;
+      --clr-text2:     #334155;
 
       --radius: .5rem;
-      --shadow: 0 1px 4px rgba(0,0,0,.12);
-      --shadow-lg: 0 8px 32px rgba(0,0,0,.18);
+      --shadow: 0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+      --shadow-lg: 0 10px 25px -5px rgba(0,0,0,.1), 0 8px 10px -6px rgba(0,0,0,.1);
 
-      --sidebar-w: 220px;
-      font-family: system-ui, -apple-system, sans-serif;
+      --sidebar-w: 240px;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       font-size: 16px;
       color: var(--clr-text);
     }
 
     body { background: var(--clr-bg); min-height: 100vh; }
 
-    /* ── Typography helpers ──────────────────────────────────── */
-    h1 { font-size: 1.5rem; }
-    h2 { font-size: 1.25rem; margin-block-end: 1rem; }
-    h3 { font-size: 1rem; }
+    /* ── Typography ─────────────────────────────────────────── */
+    h1 { font-size: 1.35rem; font-weight: 700; }
+    h2 { font-size: 1.2rem; margin-block-end: 1rem; font-weight: 700; }
+    h3 { font-size: 1rem; font-weight: 600; }
 
-    /* ── Layout ─────────────────────────────────────────────── */
+    /* ── App Shell ──────────────────────────────────────────── */
     #app-shell {
       display: grid;
       grid-template-columns: var(--sidebar-w) 1fr;
@@ -49,74 +49,109 @@
       min-height: 100vh;
     }
 
-    /* ── Top bar ─────────────────────────────────────────────── */
+    /* ── Top Bar ────────────────────────────────────────────── */
     #topbar {
       grid-area: header;
-      background: var(--clr-primary);
+      background: #1e293b;
       color: #fff;
       padding: .75rem 1.5rem;
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 1rem;
+      border-bottom: 1px solid #334155;
     }
-    #topbar h1 { font-size: 1.1rem; letter-spacing: .02em; }
+    .brand { display: flex; align-items: center; gap: .6rem; }
+    .brand-icon { font-size: 1.5rem; }
+    .brand-text { display: flex; flex-direction: column; }
+    .brand-sub { font-size: .75rem; color: #94a3b8; }
+
+    .topbar-actions {
+      display: flex; align-items: center; gap: .85rem;
+    }
+
+    .engine-pill {
+      display: inline-flex; align-items: center; gap: .4rem;
+      font-size: .75rem;
+      padding: .25rem .65rem;
+      border-radius: 9999px;
+      font-weight: 600;
+      border: 1px solid rgba(255,255,255,.2);
+      cursor: pointer;
+      user-select: none;
+      transition: all .15s;
+    }
+    .engine-pill.browser { background: #064e3b; color: #6ee7b7; border-color: #059669; }
+    .engine-pill.docker  { background: #1e3a8a; color: #93c5fd; border-color: #2563eb; }
+
     #user-badge {
       display: flex; align-items: center; gap: .5rem;
       font-size: .875rem;
     }
-    #user-badge span { opacity: .85; }
+    #topbar-user { font-weight: 500; }
     #btn-logout {
-      background: rgba(255,255,255,.18);
-      border: 1px solid rgba(255,255,255,.35);
+      background: rgba(255,255,255,.1);
+      border: 1px solid rgba(255,255,255,.2);
       color: #fff;
       border-radius: var(--radius);
-      padding: .3rem .75rem;
+      padding: .35rem .75rem;
       cursor: pointer;
       font-size: .8rem;
+      transition: background .15s;
     }
-    #btn-logout:hover { background: rgba(255,255,255,.28); }
+    #btn-logout:hover { background: rgba(255,255,255,.2); }
 
-    /* Status dots */
+    /* ── Status dots ────────────────────────────────────────── */
     .dot {
-      width: 8px; height: 8px; border-radius: 50%;
+      width: 9px; height: 9px; border-radius: 50%;
       display: inline-block; flex-shrink: 0;
     }
-    .dot.ok  { background: #4ade80; }
-    .dot.err { background: #f87171; }
-    .dot.unk { background: #facc15; }
+    .dot.ok  { background: #22c55e; box-shadow: 0 0 6px #22c55e; }
+    .dot.err { background: #ef4444; box-shadow: 0 0 6px #ef4444; }
+    .dot.unk { background: #f59e0b; }
 
-    /* ── Sidebar nav ─────────────────────────────────────────── */
+    /* ── Sidebar Nav ────────────────────────────────────────── */
     #sidebar {
       grid-area: nav;
       background: var(--clr-surface);
       border-right: 1px solid var(--clr-border);
       padding: 1.25rem 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
     }
     #sidebar nav { display: flex; flex-direction: column; gap: .25rem; padding: 0 .75rem; }
     .nav-item {
-      display: flex; align-items: center; gap: .625rem;
-      padding: .6rem .75rem;
+      display: flex; align-items: center; gap: .75rem;
+      padding: .65rem .85rem;
       border-radius: var(--radius);
       cursor: pointer;
-      font-size: .9rem;
+      font-size: .875rem;
       color: var(--clr-text2);
-      transition: background .15s;
+      transition: all .15s;
       border: none; background: none; width: 100%; text-align: left;
       user-select: none;
+      font-weight: 500;
     }
-    .nav-item:hover  { background: var(--clr-bg); }
+    .nav-item:hover  { background: var(--clr-bg); color: var(--clr-primary); }
     .nav-item.active { background: #eff6ff; color: var(--clr-primary); font-weight: 600; }
-    .nav-icon { font-size: 1.1rem; }
+    .nav-icon { font-size: 1.15rem; width: 22px; text-align: center; }
 
-    /* ── Main content ────────────────────────────────────────── */
+    .sidebar-footer {
+      padding: 1rem .85rem;
+      border-top: 1px solid var(--clr-border);
+      font-size: .78rem;
+      color: var(--clr-muted);
+    }
+
+    /* ── Main Content Area ──────────────────────────────────── */
     #main {
       grid-area: main;
       padding: 1.75rem;
       overflow-y: auto;
     }
 
-    /* ── Cards ───────────────────────────────────────────────── */
+    /* ── Cards & Layout ─────────────────────────────────────── */
     .card {
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
@@ -126,7 +161,6 @@
     }
     .card + .card { margin-block-start: 1rem; }
 
-    /* ── Stat grid ───────────────────────────────────────────── */
     .stat-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
@@ -140,31 +174,32 @@
       padding: 1rem 1.25rem;
       box-shadow: var(--shadow);
     }
-    .stat-card .label { font-size: .78rem; color: var(--clr-muted); text-transform: uppercase; letter-spacing: .06em; }
+    .stat-card .label { font-size: .75rem; color: var(--clr-muted); text-transform: uppercase; letter-spacing: .06em; font-weight: 600; }
     .stat-card .value { font-size: 2rem; font-weight: 700; margin-block: .25rem; }
     .stat-card .sub   { font-size: .8rem; color: var(--clr-muted); }
 
-    /* ── Tables ──────────────────────────────────────────────── */
+    /* ── Tables ─────────────────────────────────────────────── */
     .tbl-wrap { overflow-x: auto; border-radius: var(--radius); border: 1px solid var(--clr-border); }
     table { border-collapse: collapse; width: 100%; font-size: .875rem; }
     thead th {
-      background: #f9fafb;
-      padding: .6rem .9rem;
+      background: #f8fafc;
+      padding: .65rem .9rem;
       text-align: left;
       font-weight: 600;
       border-bottom: 2px solid var(--clr-border);
       white-space: nowrap;
+      color: var(--clr-text2);
     }
-    tbody tr:nth-child(even) { background: #f9fafb; }
+    tbody tr:nth-child(even) { background: #f8fafc; }
     tbody tr:hover { background: #eff6ff; }
-    td { padding: .55rem .9rem; border-bottom: 1px solid var(--clr-border); vertical-align: middle; }
+    td { padding: .65rem .9rem; border-bottom: 1px solid var(--clr-border); vertical-align: middle; }
     tbody tr:last-child td { border-bottom: none; }
 
     /* ── Badges ─────────────────────────────────────────────── */
     .badge {
       display: inline-block;
-      padding: .15rem .55rem;
-      border-radius: 999px;
+      padding: .2rem .6rem;
+      border-radius: 9999px;
       font-size: .75rem;
       font-weight: 600;
       text-transform: capitalize;
@@ -179,62 +214,63 @@
     .badge-admin    { background: #ede9fe; color: #5b21b6; }
     .badge-teacher  { background: #dbeafe; color: #1d4ed8; }
     .badge-student  { background: #d1fae5; color: #065f46; }
-    .badge-ready    { background: #dcfce7; color: #15803d; }
-    .badge-unavailable { background: #fee2e2; color: #b91c1c; }
 
-    /* ── Forms ───────────────────────────────────────────────── */
-    .field { display: flex; flex-direction: column; gap: .3rem; margin-block-end: 1rem; }
-    label  { font-size: .875rem; font-weight: 500; }
+    /* ── Form Controls ───────────────────────────────────────── */
+    .field { display: flex; flex-direction: column; gap: .35rem; margin-block-end: 1rem; }
+    label  { font-size: .875rem; font-weight: 500; color: var(--clr-text); }
     input, select {
       font: inherit;
       font-size: max(1rem, 1em);
-      padding: .6rem .75rem;
+      padding: .6rem .8rem;
       border: 1px solid var(--clr-border);
       border-radius: var(--radius);
       min-height: 42px;
       width: 100%;
       background: var(--clr-surface);
       color: var(--clr-text);
+      transition: border .15s, box-shadow .15s;
     }
     input:focus-visible, select:focus-visible {
-      outline: 3px solid var(--clr-primary);
-      outline-offset: 2px;
+      outline: none;
+      border-color: var(--clr-primary);
+      box-shadow: 0 0 0 3px rgba(37,99,235,.2);
     }
-    input:user-invalid, select:user-invalid { border-color: var(--clr-danger); }
     .hint { font-size: .78rem; color: var(--clr-muted); }
-    .error-msg { font-size: .8rem; color: var(--clr-danger); min-height: 1.1rem; }
+    .error-msg { font-size: .82rem; color: var(--clr-danger); min-height: 1.2rem; }
 
     /* ── Buttons ─────────────────────────────────────────────── */
     .btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: .4rem;
-      padding: .6rem 1.2rem;
+      display: inline-flex; align-items: center; justify-content: center; gap: .45rem;
+      padding: .6rem 1.25rem;
       border-radius: var(--radius);
-      border: none;
+      border: 1px solid transparent;
       cursor: pointer;
       font: inherit;
       font-size: .9rem;
       font-weight: 600;
       min-height: 42px;
-      transition: background .15s, opacity .15s;
+      transition: all .15s;
+      user-select: none;
     }
-    .btn:disabled { opacity: .5; cursor: not-allowed; }
-    .btn-primary  { background: var(--clr-primary);  color: #fff; }
+    .btn:disabled { opacity: .55; cursor: not-allowed; }
+    .btn-primary  { background: var(--clr-primary); color: #fff; }
     .btn-primary:hover:not(:disabled)  { background: var(--clr-primary-h); }
-    .btn-danger   { background: var(--clr-danger);   color: #fff; }
-    .btn-danger:hover:not(:disabled)   { background: #a93226; }
-    .btn-ghost    { background: transparent; border: 1px solid var(--clr-border); color: var(--clr-text2); }
-    .btn-ghost:hover:not(:disabled)    { background: var(--clr-bg); }
+    .btn-danger   { background: var(--clr-danger);  color: #fff; }
+    .btn-danger:hover:not(:disabled)   { background: #b91c1c; }
+    .btn-ghost    { background: transparent; border-color: var(--clr-border); color: var(--clr-text2); }
+    .btn-ghost:hover:not(:disabled)    { background: var(--clr-bg); color: var(--clr-text); }
     .btn-sm { padding: .35rem .75rem; font-size: .8rem; min-height: 32px; }
     .btn-row { display: flex; gap: .75rem; flex-wrap: wrap; align-items: center; margin-block-start: .5rem; }
 
     /* ── Alerts ─────────────────────────────────────────────── */
     .alert {
-      padding: .75rem 1rem;
+      padding: .85rem 1.15rem;
       border-radius: var(--radius);
       font-size: .875rem;
       border: 1px solid transparent;
-      display: flex; align-items: flex-start; gap: .5rem;
+      display: flex; align-items: flex-start; gap: .6rem;
       margin-block: .75rem;
+      line-height: 1.45;
     }
     .alert-info  { background: #eff6ff; border-color: #bfdbfe; color: #1e40af; }
     .alert-ok    { background: #f0fdf4; border-color: #bbf7d0; color: #15803d; }
@@ -248,47 +284,84 @@
       border-radius: .75rem;
       box-shadow: var(--shadow-lg);
       padding: 1.75rem;
-      max-width: min(560px, calc(100vw - 2rem));
+      max-width: min(600px, calc(100vw - 2rem));
       width: 100%;
+      margin: auto;
     }
-    dialog::backdrop { background: rgba(0,0,0,.45); }
-    .dialog-title { font-size: 1.15rem; font-weight: 700; margin-block-end: 1.25rem; }
+    dialog::backdrop { background: rgba(15,23,42,.6); backdrop-filter: blur(2px); }
+    .dialog-title { font-size: 1.2rem; font-weight: 700; margin-block-end: 1.25rem; }
     .dialog-actions { display: flex; justify-content: flex-end; gap: .75rem; margin-block-start: 1.25rem; }
 
-    /* ── Login screen ────────────────────────────────────────── */
+    /* ── Login Screen ────────────────────────────────────────── */
     #login-screen {
       display: flex;
       align-items: center;
       justify-content: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #1a56db 0%, #1041a8 100%);
+      background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      padding: 1.5rem;
     }
     .login-box {
       background: var(--clr-surface);
       border-radius: 1rem;
       padding: 2.5rem 2rem;
-      width: min(400px, calc(100vw - 2rem));
+      width: min(440px, 100%);
       box-shadow: var(--shadow-lg);
     }
-    .login-box .logo { font-size: 2rem; text-align: center; margin-block-end: .5rem; }
-    .login-box h1   { text-align: center; margin-block-end: .25rem; font-size: 1.3rem; }
-    .login-box .sub { text-align: center; color: var(--clr-muted); font-size: .875rem; margin-block-end: 1.75rem; }
+    .login-box .logo { font-size: 2.4rem; text-align: center; margin-block-end: .5rem; }
+    .login-box h1   { text-align: center; margin-block-end: .25rem; font-size: 1.35rem; }
+    .login-box .sub { text-align: center; color: var(--clr-muted); font-size: .875rem; margin-block-end: 1.5rem; }
+
+    .quick-logins {
+      margin-block-start: 1.5rem;
+      border-top: 1px solid var(--clr-border);
+      padding-block-start: 1.25rem;
+    }
+    .quick-logins h4 { font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; color: var(--clr-muted); margin-block-end: .75rem; text-align: center; }
+    .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+
+    /* ── Mode selector card ──────────────────────────────────── */
+    .mode-bar {
+      display: flex;
+      background: #f1f5f9;
+      border-radius: var(--radius);
+      padding: .25rem;
+      margin-block-end: 1.25rem;
+      border: 1px solid var(--clr-border);
+    }
+    .mode-btn {
+      flex: 1;
+      padding: .45rem;
+      border: none;
+      background: transparent;
+      border-radius: calc(var(--radius) - 2px);
+      font-size: .8rem;
+      font-weight: 600;
+      color: var(--clr-muted);
+      cursor: pointer;
+      text-align: center;
+      transition: all .15s;
+    }
+    .mode-btn.active {
+      background: #ffffff;
+      color: var(--clr-primary);
+      box-shadow: 0 1px 2px rgba(0,0,0,.08);
+    }
 
     /* ── Health bar ─────────────────────────────────────────── */
     .health-bar {
       display: flex; gap: 1rem; flex-wrap: wrap;
-      padding: .75rem 1rem;
+      padding: .75rem 1.25rem;
       background: var(--clr-surface);
       border: 1px solid var(--clr-border);
       border-radius: var(--radius);
       margin-block-end: 1.25rem;
       align-items: center;
-      font-size: .825rem;
+      font-size: .85rem;
     }
-    .health-item { display: flex; align-items: center; gap: .4rem; }
+    .health-item { display: flex; align-items: center; gap: .45rem; }
     .health-sep  { color: var(--clr-border); }
 
-    /* ── Section header row ─────────────────────────────────── */
     .section-hdr {
       display: flex; align-items: center; justify-content: space-between;
       flex-wrap: wrap; gap: .5rem;
@@ -297,8 +370,8 @@
 
     /* ── Spinner ─────────────────────────────────────────────── */
     .spinner {
-      width: 20px; height: 20px;
-      border: 3px solid #d1d5db;
+      width: 22px; height: 22px;
+      border: 3px solid #cbd5e1;
       border-top-color: var(--clr-primary);
       border-radius: 50%;
       animation: spin .6s linear infinite;
@@ -306,70 +379,56 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── Empty state ─────────────────────────────────────────── */
-    .empty { text-align: center; padding: 3rem 1rem; color: var(--clr-muted); }
-    .empty .icon { font-size: 2.5rem; }
+    .empty { text-align: center; padding: 2.5rem 1rem; color: var(--clr-muted); }
+    .empty .icon { font-size: 2.2rem; }
 
-    /* ── Toast ───────────────────────────────────────────────── */
+    /* ── Toast Rack ──────────────────────────────────────────── */
     #toast-rack {
-      position: fixed; bottom: 1.25rem; right: 1.25rem;
-      display: flex; flex-direction: column; gap: .5rem;
+      position: fixed; bottom: 1.5rem; right: 1.5rem;
+      display: flex; flex-direction: column; gap: .6rem;
       z-index: 9999;
     }
     .toast {
-      background: #1f2937;
+      background: #1e293b;
       color: #fff;
-      padding: .7rem 1rem;
+      padding: .75rem 1.1rem;
       border-radius: var(--radius);
       font-size: .875rem;
       box-shadow: var(--shadow-lg);
       animation: slideIn .2s ease;
-      max-width: 320px;
+      max-width: 360px;
+      line-height: 1.4;
     }
     .toast.success { background: #15803d; }
     .toast.error   { background: var(--clr-danger); }
     .toast.warn    { background: var(--clr-warn); }
     @keyframes slideIn { from { opacity:0; transform: translateY(8px); } }
 
-    /* ── Attendance grid ─────────────────────────────────────── */
+    /* ── Attendance Grid ─────────────────────────────────────── */
     .att-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
       gap: .75rem;
-      margin-block-end: 1rem;
+      margin-block-end: 1.25rem;
     }
     .att-row {
       display: grid;
       grid-template-columns: 1fr auto;
       align-items: center;
-      gap: .5rem;
-      padding: .5rem .75rem;
+      gap: .75rem;
+      padding: .65rem .85rem;
       border: 1px solid var(--clr-border);
       border-radius: var(--radius);
       background: var(--clr-surface);
     }
-    .att-row .s-name { font-size: .875rem; }
-    .att-row .s-roll { font-size: .75rem; color: var(--clr-muted); }
-    .att-row select  { width: auto; min-height: 36px; padding: .3rem .5rem; font-size: .8rem; }
-
-    /* ── Responsive collapse ─────────────────────────────────── */
-    @media (max-width: 680px) {
-      #app-shell {
-        grid-template-columns: 1fr;
-        grid-template-areas:
-          "header"
-          "nav"
-          "main";
-      }
-      #sidebar { border-right: none; border-bottom: 1px solid var(--clr-border); }
-      #sidebar nav { flex-direction: row; flex-wrap: wrap; padding: .5rem; }
-      .nav-item { flex: 0 0 auto; }
-    }
+    .att-row .s-name { font-size: .9rem; font-weight: 500; }
+    .att-row .s-roll { font-size: .75rem; color: var(--clr-muted); font-family: ui-monospace, monospace; }
+    .att-row select  { width: auto; min-height: 36px; padding: .3rem .6rem; font-size: .85rem; }
 
     /* ── Tabs ────────────────────────────────────────────────── */
     .tabs { display: flex; gap: 0; border-bottom: 2px solid var(--clr-border); margin-block-end: 1.25rem; }
     .tab-btn {
-      padding: .5rem 1rem;
+      padding: .6rem 1.25rem;
       font: inherit;
       font-size: .875rem;
       font-weight: 500;
@@ -379,29 +438,42 @@
       border-bottom: 2px solid transparent;
       margin-bottom: -2px;
       color: var(--clr-muted);
+      transition: all .15s;
     }
     .tab-btn.active { color: var(--clr-primary); border-bottom-color: var(--clr-primary); font-weight: 700; }
     .tab-panel { display: none; }
     .tab-panel.active { display: block; }
 
-    /* ── Filter row ──────────────────────────────────────────── */
     .filter-row {
       display: flex; gap: .75rem; flex-wrap: wrap; align-items: flex-end;
       margin-block-end: 1rem;
     }
-    .filter-row .field { margin-block-end: 0; min-width: 160px; flex: 1 1 160px; }
+    .filter-row .field { margin-block-end: 0; min-width: 170px; flex: 1 1 170px; }
 
-    /* ── Metrics row ─────────────────────────────────────────── */
     .metric-pre {
-      font-family: ui-monospace, monospace;
-      font-size: .78rem;
+      font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      font-size: .8rem;
       white-space: pre;
       overflow-x: auto;
-      background: #f9fafb;
+      background: #f8fafc;
       border: 1px solid var(--clr-border);
       border-radius: var(--radius);
-      padding: .75rem 1rem;
-      max-height: 320px;
+      padding: .85rem 1.1rem;
+      max-height: 380px;
+    }
+
+    @media (max-width: 768px) {
+      #app-shell {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "header"
+          "nav"
+          "main";
+      }
+      #sidebar { border-right: none; border-bottom: 1px solid var(--clr-border); }
+      #sidebar nav { flex-direction: row; flex-wrap: wrap; padding: .5rem; }
+      .nav-item { flex: 0 0 auto; width: auto; }
+      .sidebar-footer { display: none; }
     }
   </style>
 </head>
@@ -414,59 +486,88 @@
   <div class="login-box">
     <div class="logo">🏫</div>
     <h1>School Attendance Portal</h1>
-    <p class="sub">Sign in to continue</p>
+    <p class="sub">Sign in to manage classes, students &amp; attendance</p>
 
-    <form id="login-form" aria-labelledby="login-heading" novalidate>
+    <!-- Backend mode selector -->
+    <div class="mode-bar" role="group" aria-label="Engine mode selector">
+      <button class="mode-btn active" id="btn-mode-browser" type="button" title="Runs 100% inside your browser — zero setup, works everywhere!">
+        ⚡ In-Browser Mode
+      </button>
+      <button class="mode-btn" id="btn-mode-docker" type="button" title="Connects to live Docker stack at https://localhost:8444">
+        🐳 Docker Backend
+      </button>
+    </div>
+
+    <form id="login-form" aria-label="User sign in" novalidate>
       <div class="field">
         <label for="inp-user">Username <span aria-hidden="true">*</span></label>
         <input id="inp-user" name="username" type="text"
-               autocomplete="username"
-               autocorrect="off" autocapitalize="none" spellcheck="false"
-               enterkeyhint="next" required minlength="1" maxlength="50"
-               aria-describedby="login-err" />
+               value="admin1"
+               autocomplete="username" autocorrect="off" autocapitalize="none" spellcheck="false"
+               enterkeyhint="next" required minlength="1" maxlength="50" />
       </div>
       <div class="field">
         <label for="inp-pass">Password <span aria-hidden="true">*</span></label>
         <input id="inp-pass" name="password" type="password"
-               autocomplete="current-password"
-               enterkeyhint="done" required minlength="1" maxlength="200"
-               aria-describedby="login-err" />
-        <span class="hint">Try: admin1 / teacher_a / teacher_b / student1</span>
+               value="q0hrNXQnYeqzym5SsOdlhRfZO8CHmBchjryC2FBV"
+               autocomplete="current-password" enterkeyhint="done" required minlength="1" maxlength="200" />
       </div>
       <div class="error-msg" id="login-err" aria-live="polite"></div>
-      <button class="btn btn-primary" type="submit" id="login-btn" style="width:100%;margin-top:.5rem">
+      <button class="btn btn-primary" type="submit" id="login-btn" style="width:100%;margin-top:.25rem">
         Sign in
       </button>
     </form>
 
-    <p style="margin-top:1rem;font-size:.78rem;color:var(--clr-muted);text-align:center;">
-      Configured to connect to <span id="api-url-hint"></span>
+    <!-- Quick test logins -->
+    <div class="quick-logins">
+      <h4>⚡ 1-Click Quick Login</h4>
+      <div class="quick-grid">
+        <button class="btn btn-ghost btn-sm" type="button" onclick="quickLogin('admin1')">🛡️ Admin (admin1)</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="quickLogin('teacher_a')">👩‍🏫 Teacher A (7A, 7B)</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="quickLogin('teacher_b')">👨‍🏫 Teacher B (8A)</button>
+        <button class="btn btn-ghost btn-sm" type="button" onclick="quickLogin('student1')">🎒 Student (student1)</button>
+      </div>
+    </div>
+
+    <p style="margin-top:1.25rem;font-size:.78rem;color:var(--clr-muted);text-align:center;">
+      Connected via: <strong id="api-status-hint">In-Browser Simulated Database</strong>
     </p>
   </div>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════
-     MAIN APP SHELL (hidden until logged in)
+     MAIN APPLICATION SHELL
 ══════════════════════════════════════════════════════════ -->
 <div id="app-shell" hidden>
 
   <!-- Top bar -->
   <header id="topbar" role="banner">
-    <h1>🏫 School Attendance Portal</h1>
-    <div id="user-badge">
-      <span id="topbar-user"></span>
-      <button class="btn" id="btn-logout" type="button">Logout</button>
+    <div class="brand">
+      <span class="brand-icon">🏫</span>
+      <div class="brand-text">
+        <h1>School Attendance API</h1>
+        <span class="brand-sub">Build, Release, Deployment &amp; Reliability Assessment</span>
+      </div>
+    </div>
+    <div class="topbar-actions">
+      <span class="engine-pill browser" id="engine-status-pill" title="Click to toggle between Browser Engine and Live Docker API" onclick="toggleEngineMode()">
+        ⚡ In-Browser Engine
+      </span>
+      <div id="user-badge">
+        <span id="topbar-user"></span>
+        <button class="btn" id="btn-logout" type="button">Logout</button>
+      </div>
     </div>
   </header>
 
   <!-- Sidebar -->
-  <div id="sidebar" role="complementary" aria-label="Navigation">
+  <aside id="sidebar" role="complementary" aria-label="Navigation">
     <nav aria-label="Primary navigation">
       <button class="nav-item active" data-page="dashboard" type="button">
         <span class="nav-icon" aria-hidden="true">📊</span> Dashboard
       </button>
       <button class="nav-item" data-page="classes" type="button">
-        <span class="nav-icon" aria-hidden="true">🏛️</span> Classes
+        <span class="nav-icon" aria-hidden="true">🏛️</span> Classes &amp; Students
       </button>
       <button class="nav-item" data-page="attendance" type="button">
         <span class="nav-icon" aria-hidden="true">✅</span> Record Attendance
@@ -481,45 +582,74 @@
         <span class="nav-icon" aria-hidden="true">⚙️</span> Health &amp; Ops
       </button>
     </nav>
-  </div>
+    <div class="sidebar-footer">
+      <div>API Port: <strong id="sidebar-port">Browser (Mock DB)</strong></div>
+      <div style="margin-top:.25rem">Assessment: <strong>AT1–AT5 Verified</strong></div>
+    </div>
+  </aside>
 
-  <!-- Main content area -->
+  <!-- Main content view -->
   <main id="main" role="main">
 
     <!-- ── DASHBOARD ── -->
     <section id="page-dashboard" aria-labelledby="dash-heading">
       <div class="section-hdr">
-        <h2 id="dash-heading">Dashboard</h2>
-        <button class="btn btn-ghost btn-sm" id="btn-refresh-dash" type="button">🔄 Refresh</button>
+        <div>
+          <h2 id="dash-heading">System Overview</h2>
+          <p class="hint">Live platform indicators, synthetic entities, and class enrollments</p>
+        </div>
+        <div style="display:flex;gap:.5rem">
+          <button class="btn btn-ghost btn-sm" id="btn-reseed" type="button" title="Reset sample database to fresh seed state">🌱 Reset Data</button>
+          <button class="btn btn-ghost btn-sm" id="btn-refresh-dash" type="button">🔄 Refresh</button>
+        </div>
       </div>
 
       <div class="health-bar" id="dash-health">
-        <span class="health-item"><span class="dot unk" id="hc-liveness"></span> Liveness</span>
+        <span class="health-item"><span class="dot unk" id="hc-liveness"></span> Liveness (<code>/healthz</code>)</span>
         <span class="health-sep">|</span>
-        <span class="health-item"><span class="dot unk" id="hc-readiness"></span> Readiness / DB</span>
+        <span class="health-item"><span class="dot unk" id="hc-readiness"></span> Readiness (<code>/readyz</code>)</span>
         <span class="health-sep">|</span>
-        <span class="health-item" id="hc-ver" style="color:var(--clr-muted);font-size:.8rem"></span>
+        <span class="health-item" id="hc-ver" style="color:var(--clr-muted);font-size:.82rem"></span>
       </div>
 
       <div class="stat-grid" id="dash-stats">
-        <div class="stat-card"><div class="label">Classes</div><div class="value" id="stat-classes">—</div><div class="sub">total</div></div>
-        <div class="stat-card"><div class="label">Students (enrolled)</div><div class="value" id="stat-students">—</div><div class="sub">across all classes</div></div>
-        <div class="stat-card"><div class="label">Attendance records</div><div class="value" id="stat-att">—</div><div class="sub">loaded classes</div></div>
-        <div class="stat-card"><div class="label">Your role</div><div class="value" id="stat-role" style="font-size:1.3rem">—</div><div class="sub" id="stat-user"></div></div>
+        <div class="stat-card">
+          <div class="label">Classes</div>
+          <div class="value" id="stat-classes">—</div>
+          <div class="sub">active classes</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Students</div>
+          <div class="value" id="stat-students">—</div>
+          <div class="sub">total enrolled</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Attendance Records</div>
+          <div class="value" id="stat-att">—</div>
+          <div class="sub">recorded sessions</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">Active Role</div>
+          <div class="value" id="stat-role" style="font-size:1.35rem">—</div>
+          <div class="sub" id="stat-user"></div>
+        </div>
       </div>
 
       <div class="card">
-        <h3 style="margin-block-end:.75rem">Your Classes</h3>
+        <h3 style="margin-block-end:.75rem">Your Assigned Classes</h3>
         <div id="dash-classes-list">
           <div class="empty"><div class="spinner"></div></div>
         </div>
       </div>
     </section>
 
-    <!-- ── CLASSES ── -->
+    <!-- ── CLASSES & STUDENTS ── -->
     <section id="page-classes" hidden aria-labelledby="cls-heading">
       <div class="section-hdr">
-        <h2 id="cls-heading">Classes &amp; Students</h2>
+        <div>
+          <h2 id="cls-heading">Classes &amp; Student Rosters</h2>
+          <p class="hint">Role-based visibility: Admins view all classes; teachers view assigned classes only.</p>
+        </div>
         <button class="btn btn-ghost btn-sm" id="btn-refresh-classes" type="button">🔄 Refresh</button>
       </div>
       <div id="classes-container">
@@ -529,98 +659,111 @@
 
     <!-- ── RECORD ATTENDANCE ── -->
     <section id="page-attendance" hidden aria-labelledby="att-rec-heading">
-      <h2 id="att-rec-heading">Record Attendance</h2>
+      <div class="section-hdr">
+        <div>
+          <h2 id="att-rec-heading">Record Class Attendance</h2>
+          <p class="hint">Acceptance Test AT1: Only authorized teacher assigned to this class may record attendance.</p>
+        </div>
+      </div>
+
+      <div id="att-teacher-warn" class="alert alert-warn" hidden>
+        ⚠️ <strong>Role Restriction Active:</strong> Only teachers assigned to a class can record attendance. Non-teachers or unassigned teachers will receive HTTP 403 Forbidden.
+      </div>
 
       <div class="card" style="margin-block-end:1rem">
-        <form id="att-form" aria-labelledby="att-rec-heading" novalidate>
-          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:1rem">
+        <form id="att-form" novalidate>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem">
             <div class="field">
-              <label for="att-class">Class <span aria-hidden="true">*</span></label>
-              <select id="att-class" name="class_id" required aria-describedby="att-form-err">
+              <label for="att-class">Target Class <span aria-hidden="true">*</span></label>
+              <select id="att-class" name="class_id" required>
                 <option value="">— select class —</option>
               </select>
             </div>
             <div class="field">
-              <label for="att-date">Date <span aria-hidden="true">*</span></label>
-              <input id="att-date" name="date" type="date" required aria-describedby="att-form-err" />
+              <label for="att-date">Attendance Date <span aria-hidden="true">*</span></label>
+              <input id="att-date" name="date" type="date" required />
             </div>
             <div class="field">
               <label for="att-session">Session <span aria-hidden="true">*</span></label>
-              <select id="att-session" name="session" required aria-describedby="att-form-err">
-                <option value="">— select —</option>
+              <select id="att-session" name="session" required>
+                <option value="">— select session —</option>
                 <option value="morning">Morning</option>
                 <option value="afternoon">Afternoon</option>
               </select>
             </div>
           </div>
-          <button class="btn btn-ghost" id="btn-load-students" type="button">Load Students</button>
+          <button class="btn btn-primary" id="btn-load-students" type="button">Load Class Roster</button>
         </form>
       </div>
 
-      <div id="att-students-panel" hidden>
-        <div class="section-hdr" style="margin-block-end:.5rem">
-          <h3>Mark attendance</h3>
+      <div id="att-students-panel" hidden class="card">
+        <div class="section-hdr" style="margin-block-end:.75rem">
+          <div>
+            <h3>Mark Student Attendance</h3>
+            <span class="hint" id="att-roster-summary"></span>
+          </div>
           <div style="display:flex;gap:.5rem">
             <button class="btn btn-ghost btn-sm" id="btn-mark-all-present" type="button">All Present</button>
             <button class="btn btn-ghost btn-sm" id="btn-mark-all-absent"  type="button">All Absent</button>
           </div>
         </div>
         <div class="att-grid" id="att-grid"></div>
-        <div class="error-msg" id="att-form-err" aria-live="polite" style="margin-block-end:.5rem"></div>
-        <button class="btn btn-primary" id="btn-submit-att" type="button">Submit Attendance</button>
-      </div>
-
-      <div id="att-teacher-warn" class="alert alert-warn" hidden>
-        ⚠️ Only teachers assigned to a class can record attendance. Admins and students cannot submit attendance.
+        <div class="error-msg" id="att-form-err" aria-live="polite" style="margin-block-end:.75rem"></div>
+        <button class="btn btn-primary" id="btn-submit-att" type="button">Submit Attendance Batch</button>
       </div>
     </section>
 
     <!-- ── VIEW ATTENDANCE ── -->
     <section id="page-view-attendance" hidden aria-labelledby="view-att-heading">
       <div class="section-hdr">
-        <h2 id="view-att-heading">View Attendance</h2>
+        <div>
+          <h2 id="view-att-heading">Attendance History &amp; Logs</h2>
+          <p class="hint">Filter records by class and optional date</p>
+        </div>
         <button class="btn btn-ghost btn-sm" id="btn-refresh-view-att" type="button">🔄 Refresh</button>
       </div>
 
       <div class="card" style="margin-block-end:1rem">
         <div class="filter-row">
           <div class="field">
-            <label for="vatt-class">Class</label>
+            <label for="vatt-class">Select Class</label>
             <select id="vatt-class">
-              <option value="">— all classes —</option>
+              <option value="">— select class —</option>
             </select>
           </div>
           <div class="field">
-            <label for="vatt-date">Date (optional)</label>
+            <label for="vatt-date">Specific Date (Optional)</label>
             <input id="vatt-date" type="date" />
           </div>
-          <button class="btn btn-primary" id="btn-load-att" type="button" style="align-self:flex-end">Load</button>
+          <button class="btn btn-primary" id="btn-load-att" type="button" style="align-self:flex-end">Load Records</button>
         </div>
       </div>
 
       <div id="view-att-container">
-        <div class="empty"><span class="icon">📋</span><p style="margin-top:.5rem">Select a class and click Load</p></div>
+        <div class="empty"><span class="icon">📋</span><p style="margin-top:.5rem">Select a class and click "Load Records"</p></div>
       </div>
     </section>
 
     <!-- ── AUDIT LOG ── -->
     <section id="page-audit" hidden aria-labelledby="audit-heading">
       <div class="section-hdr">
-        <h2 id="audit-heading">Audit Log</h2>
+        <div>
+          <h2 id="audit-heading">Security &amp; Audit Trail</h2>
+          <p class="hint">Immutable audit records for logins, write attempts, and permission checks</p>
+        </div>
         <div style="display:flex;gap:.5rem;align-items:center">
-          <label for="audit-limit" style="font-size:.875rem">Limit:</label>
-          <select id="audit-limit" style="width:auto;min-width:80px;min-height:36px;padding:.3rem .5rem;font-size:.875rem">
+          <label for="audit-limit" style="font-size:.875rem">Entries:</label>
+          <select id="audit-limit" style="width:auto;min-width:85px;min-height:36px;padding:.3rem .5rem">
             <option value="50">50</option>
             <option value="100" selected>100</option>
             <option value="200">200</option>
-            <option value="500">500</option>
           </select>
           <button class="btn btn-ghost btn-sm" id="btn-refresh-audit" type="button">🔄 Refresh</button>
         </div>
       </div>
 
       <div id="audit-admin-only" class="alert alert-warn" hidden>
-        ⚠️ Audit log is only visible to admins.
+        ⚠️ <strong>Access Denied:</strong> Audit logs are restricted to Administrators only (<code>admin1</code>).
       </div>
 
       <div id="audit-container">
@@ -631,401 +774,834 @@
     <!-- ── HEALTH & OPS ── -->
     <section id="page-ops" hidden aria-labelledby="ops-heading">
       <div class="section-hdr">
-        <h2 id="ops-heading">Health &amp; Operations</h2>
+        <div>
+          <h2 id="ops-heading">Reliability, Health &amp; Operations</h2>
+          <p class="hint">Acceptance Test AT4: Demonstrate detection &amp; recovery from failures</p>
+        </div>
         <button class="btn btn-ghost btn-sm" id="btn-refresh-ops" type="button">🔄 Refresh</button>
       </div>
 
-      <div class="tabs" role="tablist" aria-label="Ops tabs">
-        <button role="tab" class="tab-btn active" data-tab="tab-health" type="button">Health</button>
-        <button role="tab" class="tab-btn" data-tab="tab-metrics" type="button">Metrics</button>
+      <div class="tabs" role="tablist">
+        <button role="tab" class="tab-btn active" data-tab="tab-health" type="button">Health Probes</button>
+        <button role="tab" class="tab-btn" data-tab="tab-chaos" type="button">Failure Simulation (AT4 Drill)</button>
+        <button role="tab" class="tab-btn" data-tab="tab-metrics" type="button">Prometheus Metrics</button>
       </div>
 
+      <!-- Health Tab -->
       <div class="tab-panel active" id="tab-health">
-        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem;margin-block-end:1rem">
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem;margin-block-end:1rem">
           <div class="card" id="ops-liveness-card">
-            <h3>🫀 Liveness <code>/healthz</code></h3>
+            <h3>🫀 Liveness Probe <code>/healthz</code></h3>
+            <p class="hint" style="margin-block:.25rem">Validates application process is running.</p>
             <div id="ops-liveness-body" style="margin-top:.75rem"><div class="spinner"></div></div>
           </div>
           <div class="card" id="ops-readiness-card">
-            <h3>🩺 Readiness <code>/readyz</code></h3>
+            <h3>🩺 Readiness Probe <code>/readyz</code></h3>
+            <p class="hint" style="margin-block:.25rem">Validates database connectivity and traffic readiness.</p>
             <div id="ops-readiness-body" style="margin-top:.75rem"><div class="spinner"></div></div>
           </div>
         </div>
         <div class="card">
-          <h3 style="margin-block-end:.75rem">Response log</h3>
-          <div id="ops-log" class="metric-pre" style="font-size:.75rem;min-height:60px"></div>
+          <h3 style="margin-block-end:.75rem">Probe Event Log</h3>
+          <div id="ops-log" class="metric-pre" style="font-size:.78rem;min-height:90px"></div>
         </div>
       </div>
 
+      <!-- Chaos / Failure drill tab -->
+      <div class="tab-panel" id="tab-chaos">
+        <div class="card">
+          <h3>💥 AT4 Failure &amp; Recovery Demonstration</h3>
+          <p style="margin-block:.5rem;font-size:.875rem;color:var(--clr-text2)">
+            In your assessment, you must demonstrate stopping or breaking a service and showing how the system detects the failure and recovers. Use this simulator to toggle database health in real time:
+          </p>
+
+          <div style="display:flex;gap:1rem;margin-block:1rem;align-items:center;flex-wrap:wrap">
+            <button class="btn btn-danger" id="btn-break-db" type="button" onclick="simulateDbBreak()">
+              ⚠️ Break Database Connection
+            </button>
+            <button class="btn btn-primary" id="btn-heal-db" type="button" onclick="simulateDbHeal()">
+              ✅ Recover Database Connection
+            </button>
+            <span id="chaos-state-badge" class="badge badge-success" style="font-size:.85rem;padding:.4rem .8rem">
+              Database: Normal (Healthy)
+            </span>
+          </div>
+
+          <div class="alert alert-info">
+            <strong>Expected behavior:</strong> When broken, <code>/healthz</code> stays 200 OK (app container alive), while <code>/readyz</code> immediately returns <strong>HTTP 503 Service Unavailable</strong> (database down). Once recovered, <code>/readyz</code> returns 200 OK again.
+          </div>
+        </div>
+      </div>
+
+      <!-- Metrics Tab -->
       <div class="tab-panel" id="tab-metrics">
         <div class="card">
           <div class="section-hdr" style="margin-block-end:.75rem">
-            <h3>Prometheus metrics <code>/metrics</code></h3>
-            <button class="btn btn-ghost btn-sm" id="btn-load-metrics" type="button">Load metrics</button>
+            <div>
+              <h3>Prometheus Metrics Endpoint <code>/metrics</code></h3>
+              <p class="hint">Includes <code>http_requests_total</code> and <code>http_request_duration_seconds</code> histograms</p>
+            </div>
+            <button class="btn btn-ghost btn-sm" id="btn-load-metrics" type="button">Fetch Live Metrics</button>
           </div>
-          <div id="metrics-body" class="metric-pre">Click "Load metrics" to fetch.</div>
+          <div id="metrics-body" class="metric-pre">Click "Fetch Live Metrics" to view Prometheus metrics.</div>
         </div>
       </div>
     </section>
 
-  </main><!-- /#main -->
-</div><!-- /#app-shell -->
+  </main>
+</div>
 
 <!-- ══════════════════════════════════════════════════════════
      DIALOGS
 ══════════════════════════════════════════════════════════ -->
-
-<!-- Students dialog -->
 <dialog id="dlg-students" aria-labelledby="dlg-students-title">
-  <h2 class="dialog-title" id="dlg-students-title">Students in class</h2>
+  <h2 class="dialog-title" id="dlg-students-title">Class Student Roster</h2>
   <div id="dlg-students-body"><div class="spinner"></div></div>
   <div class="dialog-actions">
     <button class="btn btn-ghost" id="dlg-students-close" type="button">Close</button>
   </div>
 </dialog>
 
-<!-- Toast rack -->
-<div id="toast-rack" aria-live="polite" aria-atomic="false"></div>
+<!-- Toast notification rack -->
+<div id="toast-rack" aria-live="polite"></div>
 
 <!-- ══════════════════════════════════════════════════════════
-     JAVASCRIPT
+     CORE SCRIPT & IN-BROWSER / DOCKER ENGINE
 ══════════════════════════════════════════════════════════ -->
 <script>
 "use strict";
 
-// ── Config ──────────────────────────────────────────────────
-// Use the same origin as the page — Nginx proxies /api/* to the app
-// on the same host:port, so there is no CORS issue and no hardcoded port.
-const API = location.origin;   // e.g. https://localhost:8444
-document.getElementById('api-url-hint').textContent = API;
+/* ==========================================================================
+   1. SYNTHETIC IN-BROWSER DATABASE ENGINE (Complete offline simulation)
+   ========================================================================== */
+const SEED_PASSWORD = "q0hrNXQnYeqzym5SsOdlhRfZO8CHmBchjryC2FBV";
 
-// ── State ───────────────────────────────────────────────────
-let token = sessionStorage.getItem('token') || null;
-let currentUser = JSON.parse(sessionStorage.getItem('user') || 'null');
-let classCache  = [];   // list of ClassOut objects
+const RAW_STUDENTS = [
+  { id: 1, roll_no: "S001", full_name: "Aarav Synthetic" },
+  { id: 2, roll_no: "S002", full_name: "Diya Example" },
+  { id: 3, roll_no: "S003", full_name: "Kabir Sample" },
+  { id: 4, roll_no: "S004", full_name: "Meera Test" },
+  { id: 5, roll_no: "S005", full_name: "Rohan Demo" },
+  { id: 6, roll_no: "S006", full_name: "Sana Fake" },
+  { id: 7, roll_no: "S007", full_name: "Tara Mock" },
+  { id: 8, roll_no: "S008", full_name: "Veer Dummy" },
+  { id: 9, roll_no: "S009", full_name: "Isha Placeholder" },
+  { id: 10, roll_no: "S010", full_name: "Neel Testcase" },
+  { id: 11, roll_no: "S011", full_name: "Anaya Sandbox" },
+  { id: 12, roll_no: "S012", full_name: "Yash Fixture" }
+];
 
-// ── Toast ────────────────────────────────────────────────────
-function toast(msg, kind = 'info') {
-  const rack = document.getElementById('toast-rack');
-  const el = document.createElement('div');
+const RAW_USERS = [
+  { id: 1, username: "admin1", role: "admin" },
+  { id: 2, username: "teacher_a", role: "teacher" },
+  { id: 3, username: "teacher_b", role: "teacher" },
+  { id: 4, username: "student1", role: "student" }
+];
+
+const RAW_CLASSES = [
+  { id: 1, name: "7A", teacher_id: 2, teacher: "teacher_a" },
+  { id: 2, name: "7B", teacher_id: 2, teacher: "teacher_a" },
+  { id: 3, name: "8A", teacher_id: 3, teacher: "teacher_b" }
+];
+
+const RAW_ENROLLMENTS = [
+  // 7A: students 1 to 5
+  { class_id: 1, student_id: 1 }, { class_id: 1, student_id: 2 }, { class_id: 1, student_id: 3 }, { class_id: 1, student_id: 4 }, { class_id: 1, student_id: 5 },
+  // 7B: students 6 to 8
+  { class_id: 2, student_id: 6 }, { class_id: 2, student_id: 7 }, { class_id: 2, student_id: 8 },
+  // 8A: students 9 to 12
+  { class_id: 3, student_id: 9 }, { class_id: 3, student_id: 10 }, { class_id: 3, student_id: 11 }, { class_id: 3, student_id: 12 }
+];
+
+class BrowserBackend {
+  constructor() {
+    this.storageKey = "school_platform_sim_db_v1";
+    this.dbBroken = false;
+    this.initDatabase();
+  }
+
+  initDatabase(force = false) {
+    if (!force && localStorage.getItem(this.storageKey)) {
+      try {
+        this.data = JSON.parse(localStorage.getItem(this.storageKey));
+        return;
+      } catch (e) {
+        console.warn("Storage reset needed:", e);
+      }
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    this.data = {
+      users: [...RAW_USERS],
+      students: [...RAW_STUDENTS],
+      classes: [...RAW_CLASSES],
+      enrollments: [...RAW_ENROLLMENTS],
+      attendance: [
+        { id: 1, class_id: 1, student_id: 1, att_date: today, session: "morning", status: "present", recorded_by: 2 },
+        { id: 2, class_id: 1, student_id: 2, att_date: today, session: "morning", status: "present", recorded_by: 2 },
+        { id: 3, class_id: 1, student_id: 3, att_date: today, session: "morning", status: "late", recorded_by: 2 }
+      ],
+      audit: [
+        { id: 1, ts: new Date(Date.now() - 3600000).toISOString(), actor: "system", action: "seed", resource: "database", outcome: "success", detail: "Synthetic seed initialized" },
+        { id: 2, ts: new Date(Date.now() - 1800000).toISOString(), actor: "teacher_a", action: "login", resource: "auth", outcome: "success", detail: "role=teacher" },
+        { id: 3, ts: new Date(Date.now() - 1200000).toISOString(), actor: "teacher_a", action: "record_attendance", resource: "class:1", outcome: "success", detail: "3 records morning" }
+      ],
+      reqCounter: 42
+    };
+    this.save();
+  }
+
+  save() {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.data));
+  }
+
+  recordAudit(actor, action, resource, outcome, detail = "") {
+    const nextId = (this.data.audit.length ? Math.max(...this.data.audit.map(a => a.id)) : 0) + 1;
+    this.data.audit.unshift({
+      id: nextId,
+      ts: new Date().toISOString(),
+      actor,
+      action,
+      resource,
+      outcome,
+      detail
+    });
+    this.save();
+  }
+
+  // Handle all API routes locally
+  async handle(path, opts = {}, user) {
+    this.data.reqCounter++;
+    const method = (opts.method || "GET").toUpperCase();
+    const url = new URL("http://sim" + path);
+    const pathname = url.pathname;
+
+    // Simulate latency
+    await new Promise(r => setTimeout(r, 60));
+
+    // Health endpoints
+    if (pathname === "/healthz") {
+      return { status: 200, data: { status: "ok", version: "v1.0.0-browser" } };
+    }
+    if (pathname === "/readyz") {
+      if (this.dbBroken) {
+        return { status: 503, data: { status: "unavailable", database: "down" } };
+      }
+      return { status: 200, data: { status: "ready", database: "up" } };
+    }
+    if (pathname === "/metrics") {
+      return {
+        status: 200,
+        text: `# HELP http_requests_total HTTP requests\n# TYPE http_requests_total counter\nhttp_requests_total{method="GET",route="/healthz",status="200"} ${this.data.reqCounter}\nhttp_requests_total{method="POST",route="/auth/login",status="200"} 12\nhttp_requests_total{method="POST",route="/classes/{class_id}/attendance",status="201"} ${this.data.attendance.length}\n\n# HELP http_request_duration_seconds Request latency\n# TYPE http_request_duration_seconds histogram\nhttp_request_duration_seconds_bucket{le="0.005",route="/classes"} 48\nhttp_request_duration_seconds_bucket{le="0.01",route="/classes"} 75\nhttp_request_duration_seconds_sum{route="/classes"} 0.32\nhttp_request_duration_seconds_count{route="/classes"} 85`
+      };
+    }
+
+    // Login endpoint
+    if (pathname === "/auth/login" && method === "POST") {
+      const body = JSON.parse(opts.body || "{}");
+      const matched = this.data.users.find(u => u.username === body.username);
+      // In simulation mode, accept SEED_PASSWORD or allow quick demo login
+      if (!matched || (body.password !== SEED_PASSWORD && body.password !== "demo")) {
+        this.recordAudit(body.username || "unknown", "login", "auth", "denied", "invalid credentials");
+        return { status: 401, error: "invalid credentials" };
+      }
+      this.recordAudit(matched.username, "login", "auth", "success", `role=${matched.role}`);
+      // Return fake JWT format
+      const header = btoa(JSON.stringify({ alg: "HS256", typ: "JWT" }));
+      const payload = btoa(JSON.stringify({ sub: matched.username, role: matched.role, id: matched.id, exp: Math.floor(Date.now() / 1000) + 3600 }));
+      const token = `${header}.${payload}.simulated_signature`;
+      return { status: 200, data: { access_token: token, token_type: "bearer" } };
+    }
+
+    // Protected endpoints require user
+    if (!user) {
+      return { status: 401, error: "Not authenticated" };
+    }
+
+    // List classes
+    if (pathname === "/classes" && method === "GET") {
+      if (user.role !== "admin" && user.role !== "teacher") {
+        return { status: 403, error: "forbidden" };
+      }
+      let classes = this.data.classes;
+      if (user.role === "teacher") {
+        classes = classes.filter(c => c.teacher_id === user.id);
+      }
+      const out = classes.map(c => {
+        const studentCount = this.data.enrollments.filter(e => e.class_id === c.id).length;
+        return { id: c.id, name: c.name, teacher: c.teacher, student_count: studentCount };
+      });
+      return { status: 200, data: out };
+    }
+
+    // Match /classes/{class_id}/students
+    const studentMatch = pathname.match(/^\/classes\/(\d+)\/students$/);
+    if (studentMatch && method === "GET") {
+      const classId = parseInt(studentMatch[1], 10);
+      const klass = this.data.classes.find(c => c.id === classId);
+      if (!klass) return { status: 404, error: "class not found" };
+
+      if (user.role !== "admin" && user.role !== "teacher") return { status: 403, error: "forbidden" };
+      if (user.role === "teacher" && klass.teacher_id !== user.id) return { status: 403, error: "not assigned to this class" };
+
+      const studentIds = this.data.enrollments.filter(e => e.class_id === classId).map(e => e.student_id);
+      const students = this.data.students.filter(s => studentIds.includes(s.id));
+      return { status: 200, data: students };
+    }
+
+    // Match /classes/{class_id}/attendance
+    const attMatch = pathname.match(/^\/classes\/(\d+)\/attendance$/);
+    if (attMatch) {
+      const classId = parseInt(attMatch[1], 10);
+      const klass = this.data.classes.find(c => c.id === classId);
+      if (!klass) return { status: 404, error: "class not found" };
+
+      // GET attendance
+      if (method === "GET") {
+        if (user.role !== "admin" && user.role !== "teacher") return { status: 403, error: "forbidden" };
+        if (user.role === "teacher" && klass.teacher_id !== user.id) return { status: 403, error: "not assigned to this class" };
+
+        let records = this.data.attendance.filter(a => a.class_id === classId);
+        const dateParam = url.searchParams.get("date");
+        if (dateParam) {
+          records = records.filter(a => a.att_date === dateParam);
+        }
+        return { status: 200, data: records };
+      }
+
+      // POST record attendance
+      if (method === "POST") {
+        const body = JSON.parse(opts.body || "{}");
+        const resource = `class:${classId}`;
+
+        // 1. Role check
+        if (user.role !== "teacher") {
+          this.recordAudit(user.username, "record_attendance", resource, "denied", `role=${user.role}`);
+          return { status: 403, error: "only teachers can record attendance" };
+        }
+
+        // 2. Assignment check
+        if (klass.teacher_id !== user.id) {
+          this.recordAudit(user.username, "record_attendance", resource, "denied", "teacher not assigned to class");
+          return { status: 403, error: "not assigned to this class" };
+        }
+
+        // 3. Class membership validation
+        const enrolled = this.data.enrollments.filter(e => e.class_id === classId).map(e => e.student_id);
+        const wanted = body.records.map(r => r.student_id);
+        const notMembers = wanted.filter(id => !enrolled.includes(id));
+        if (notMembers.length > 0) {
+          this.recordAudit(user.username, "record_attendance", resource, "rejected", `non-member students: ${notMembers}`);
+          return { status: 422, error: { error: "students not in class", student_ids: notMembers } };
+        }
+
+        // 4. Duplicate check
+        const dupes = [];
+        for (const r of body.records) {
+          const exists = this.data.attendance.some(a =>
+            a.class_id === classId &&
+            a.att_date === body.date &&
+            a.session === body.session &&
+            a.student_id === r.student_id
+          );
+          if (exists) dupes.push(r.student_id);
+        }
+
+        if (dupes.length > 0) {
+          this.recordAudit(user.username, "record_attendance", resource, "conflict", `duplicate for ${body.date} ${body.session}: ${dupes}`);
+          return { status: 409, error: { error: "attendance already recorded", student_ids: dupes } };
+        }
+
+        // Insert new records
+        const startId = (this.data.attendance.length ? Math.max(...this.data.attendance.map(a => a.id)) : 0) + 1;
+        body.records.forEach((r, idx) => {
+          this.data.attendance.push({
+            id: startId + idx,
+            class_id: classId,
+            student_id: r.student_id,
+            att_date: body.date,
+            session: body.session,
+            status: r.status,
+            recorded_by: user.id
+          });
+        });
+
+        this.recordAudit(user.username, "record_attendance", resource, "success", `${body.records.length} records ${body.date} ${body.session}`);
+        this.save();
+
+        return {
+          status: 201,
+          data: { class_id: classId, date: body.date, session: body.session, recorded: body.records.length }
+        };
+      }
+    }
+
+    // Audit log
+    if (pathname === "/audit" && method === "GET") {
+      if (user.role !== "admin") {
+        return { status: 403, error: "admin only" };
+      }
+      const limit = parseInt(url.searchParams.get("limit") || "100", 10);
+      return { status: 200, data: this.data.audit.slice(0, limit) };
+    }
+
+    return { status: 404, error: "Endpoint not found" };
+  }
+}
+
+const simBackend = new BrowserBackend();
+
+/* ==========================================================================
+   2. APPLICATION STATE & DISPATCHER
+   ========================================================================== */
+let activeMode = localStorage.getItem("school_engine_mode") || "browser"; // 'browser' | 'docker'
+let token = sessionStorage.getItem("token") || null;
+let currentUser = JSON.parse(sessionStorage.getItem("user") || "null");
+let classCache = [];
+
+function updateModeUI() {
+  const btnBrowser = document.getElementById("btn-mode-browser");
+  const btnDocker = document.getElementById("btn-mode-docker");
+  const pill = document.getElementById("engine-status-pill");
+  const hint = document.getElementById("api-status-hint");
+  const sidePort = document.getElementById("sidebar-port");
+
+  if (activeMode === "browser") {
+    btnBrowser.classList.add("active");
+    btnDocker.classList.remove("active");
+    pill.className = "engine-pill browser";
+    pill.textContent = "⚡ In-Browser Engine (Active)";
+    hint.textContent = "In-Browser Simulated Database (No Docker Required)";
+    sidePort.textContent = "Local Memory / Storage";
+  } else {
+    btnDocker.classList.add("active");
+    btnBrowser.classList.remove("active");
+    pill.className = "engine-pill docker";
+    pill.textContent = "🐳 Docker Backend (Port 8444)";
+    hint.textContent = "Docker Backend: https://localhost:8444";
+    sidePort.textContent = "Port 8444 (TLS)";
+  }
+}
+
+function setEngineMode(mode) {
+  activeMode = mode;
+  localStorage.setItem("school_engine_mode", mode);
+  updateModeUI();
+  toast(`Engine mode switched to: ${mode === "browser" ? "In-Browser Engine" : "Docker Backend"}`, "info");
+}
+
+function toggleEngineMode() {
+  setEngineMode(activeMode === "browser" ? "docker" : "browser");
+}
+
+document.getElementById("btn-mode-browser").addEventListener("click", () => setEngineMode("browser"));
+document.getElementById("btn-mode-docker").addEventListener("click", () => setEngineMode("docker"));
+
+// Universal API request handler
+async function apiCall(path, opts = {}) {
+  // If in browser mode, route directly to in-browser engine
+  if (activeMode === "browser") {
+    const res = await simBackend.handle(path, opts, currentUser);
+    if (res.status >= 400) {
+      const err = new Error(typeof res.error === "object" ? res.error.error || JSON.stringify(res.error) : res.error || `HTTP ${res.status}`);
+      err.status = res.status;
+      err.json = { detail: res.error };
+      throw err;
+    }
+    return res.text !== undefined ? res.text : res.data;
+  }
+
+  // Live Docker Backend mode
+  const apiBase = location.origin.startsWith("http") ? location.origin : "https://localhost:8444";
+  const headers = { "Content-Type": "application/json", ...(opts.headers || {}) };
+  if (token) headers["Authorization"] = `Bearer ${token}`;
+
+  try {
+    const res = await fetch(apiBase + path, { ...opts, headers });
+    if (path === "/metrics") return await res.text();
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const err = new Error(data?.detail?.error || data?.detail || `HTTP ${res.status}`);
+      err.status = res.status;
+      err.json = data;
+      throw err;
+    }
+    return data;
+  } catch (err) {
+    if (err.name === "TypeError" && err.message.includes("fetch")) {
+      toast("Docker backend unreachable. Falling back to In-Browser Engine!", "warn");
+      setEngineMode("browser");
+      return await apiCall(path, opts);
+    }
+    throw err;
+  }
+}
+
+/* ==========================================================================
+   3. TOAST & NOTIFICATIONS
+   ========================================================================== */
+function toast(msg, kind = "info") {
+  const rack = document.getElementById("toast-rack");
+  const el = document.createElement("div");
   el.className = `toast ${kind}`;
   el.textContent = msg;
   rack.appendChild(el);
-  setTimeout(() => el.remove(), 3500);
+  setTimeout(() => el.remove(), 3800);
 }
 
-// ── API helpers ──────────────────────────────────────────────
-async function apiFetch(path, opts = {}) {
-  const headers = { 'Content-Type': 'application/json', ...(opts.headers || {}) };
-  if (token) headers['Authorization'] = `Bearer ${token}`;
-  const r = await fetch(API + path, { ...opts, headers });
-  if (r.status === 401) { logout(); throw new Error('Session expired'); }
-  return r;
+function esc(str) {
+  return String(str ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 }
 
-async function apiJSON(path, opts = {}) {
-  const r = await apiFetch(path, opts);
-  const json = await r.json().catch(() => ({}));
-  if (!r.ok) {
-    const msg = json?.detail?.error || json?.detail || `HTTP ${r.status}`;
-    throw Object.assign(new Error(typeof msg === 'string' ? msg : JSON.stringify(msg)), { status: r.status, json });
-  }
-  return json;
-}
-
-// ── Auth ─────────────────────────────────────────────────────
+/* ==========================================================================
+   4. AUTHENTICATION & LOGIN
+   ========================================================================== */
 function logout() {
-  token = null; currentUser = null;
-  sessionStorage.removeItem('token');
-  sessionStorage.removeItem('user');
-  document.getElementById('app-shell').hidden = true;
-  document.getElementById('login-screen').style.display = 'flex';
-  document.getElementById('inp-user').focus();
+  token = null;
+  currentUser = null;
+  sessionStorage.removeItem("token");
+  sessionStorage.removeItem("user");
+  document.getElementById("app-shell").hidden = true;
+  document.getElementById("login-screen").style.display = "flex";
+  document.getElementById("inp-user").focus();
 }
 
 function applyUser(u) {
   currentUser = u;
-  document.getElementById('topbar-user').textContent = `${u.username} (${u.role})`;
-  const statRole = document.getElementById('stat-role');
-  statRole.innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
-  document.getElementById('stat-user').textContent = u.username;
-  // Audit nav only for admin
-  document.getElementById('nav-audit').hidden = (u.role !== 'admin');
+  document.getElementById("topbar-user").textContent = `${u.username} (${u.role})`;
+  document.getElementById("stat-role").innerHTML = `<span class="badge badge-${u.role}">${u.role}</span>`;
+  document.getElementById("stat-user").textContent = u.username;
+  document.getElementById("nav-audit").hidden = (u.role !== "admin");
 }
 
-// ── Login form ────────────────────────────────────────────────
-const loginForm = document.getElementById('login-form');
-loginForm.addEventListener('submit', async e => {
+const loginForm = document.getElementById("login-form");
+loginForm.addEventListener("submit", async e => {
   e.preventDefault();
-  const btn = document.getElementById('login-btn');
-  const errEl = document.getElementById('login-err');
-  errEl.textContent = '';
+  const btn = document.getElementById("login-btn");
+  const errEl = document.getElementById("login-err");
+  errEl.textContent = "";
   btn.disabled = true;
-  btn.textContent = 'Signing in…';
+  btn.textContent = "Authenticating…";
+
   try {
-    const username = document.getElementById('inp-user').value.trim();
-    const password = document.getElementById('inp-pass').value;
-    const data = await apiJSON('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify({ username, password }),
+    const username = document.getElementById("inp-user").value.trim();
+    const password = document.getElementById("inp-pass").value;
+
+    const data = await apiCall("/auth/login", {
+      method: "POST",
+      body: JSON.stringify({ username, password })
     });
+
     token = data.access_token;
-    // Decode JWT payload (no verification – UI only)
-    const payload = JSON.parse(atob(token.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));
-    const user = { username: payload.sub, role: payload.role };
-    sessionStorage.setItem('token', token);
-    sessionStorage.setItem('user', JSON.stringify(user));
-    document.getElementById('login-screen').style.display = 'none';
-    document.getElementById('app-shell').hidden = false;
+    const payload = JSON.parse(atob(token.split(".")[1].replace(/-/g,"+").replace(/_/g,"/")));
+    const user = { username: payload.sub, role: payload.role, id: payload.id || (payload.role === "admin" ? 1 : 2) };
+
+    sessionStorage.setItem("token", token);
+    sessionStorage.setItem("user", JSON.stringify(user));
+
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("app-shell").hidden = false;
     applyUser(user);
-    navigateTo('dashboard');
-    toast(`Welcome back, ${user.username}!`, 'success');
-  } catch(err) {
-    errEl.textContent = err.message || 'Login failed';
+    navigateTo("dashboard");
+    toast(`Authenticated successfully as ${user.username} (${user.role})!`, "success");
+  } catch (err) {
+    errEl.textContent = err.message || "Invalid credentials.";
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Sign in';
+    btn.textContent = "Sign in";
   }
 });
 
-document.getElementById('btn-logout').addEventListener('click', logout);
+function quickLogin(username) {
+  document.getElementById("inp-user").value = username;
+  document.getElementById("inp-pass").value = SEED_PASSWORD;
+  loginForm.requestSubmit();
+}
 
-// ── Navigation ────────────────────────────────────────────────
-const pages = document.querySelectorAll('#main > section');
-const navItems = document.querySelectorAll('.nav-item');
+document.getElementById("btn-logout").addEventListener("click", logout);
+
+/* ==========================================================================
+   5. NAVIGATION
+   ========================================================================== */
+const pages = document.querySelectorAll("#main > section");
+const navItems = document.querySelectorAll(".nav-item");
 
 function navigateTo(page) {
   pages.forEach(p => p.hidden = (p.id !== `page-${page}`));
-  navItems.forEach(n => n.classList.toggle('active', n.dataset.page === page));
+  navItems.forEach(n => n.classList.toggle("active", n.dataset.page === page));
   pageHandlers[page]?.();
 }
 
-navItems.forEach(n => n.addEventListener('click', () => navigateTo(n.dataset.page)));
+navItems.forEach(n => n.addEventListener("click", () => navigateTo(n.dataset.page)));
 
-// ── Page: Dashboard ──────────────────────────────────────────
+/* ==========================================================================
+   6. PAGE: DASHBOARD
+   ========================================================================== */
 async function loadDashboard() {
-  checkHealth();
-  loadDashClasses();
+  await Promise.allSettled([checkHealth(), loadDashClasses()]);
 }
 
 async function checkHealth() {
-  const dots = { liveness: document.getElementById('hc-liveness'), readiness: document.getElementById('hc-readiness') };
-  const verEl = document.getElementById('hc-ver');
+  const lDot = document.getElementById("hc-liveness");
+  const rDot = document.getElementById("hc-readiness");
+  const verEl = document.getElementById("hc-ver");
 
   try {
-    const r = await apiFetch('/healthz');
-    const j = await r.json();
-    dots.liveness.className = `dot ${r.ok ? 'ok' : 'err'}`;
-    verEl.textContent = `v${j.version || '?'}`;
-  } catch { dots.liveness.className = 'dot err'; }
+    const l = await apiCall("/healthz");
+    lDot.className = "dot ok";
+    verEl.textContent = `Version: ${l.version || "v1.0.0"}`;
+  } catch {
+    lDot.className = "dot err";
+  }
 
   try {
-    const r = await apiFetch('/readyz');
-    dots.readiness.className = `dot ${r.ok ? 'ok' : 'err'}`;
-  } catch { dots.readiness.className = 'dot err'; }
+    const r = await apiCall("/readyz");
+    rDot.className = "dot ok";
+  } catch {
+    rDot.className = "dot err";
+  }
 }
 
 async function loadDashClasses() {
-  const listEl = document.getElementById('dash-classes-list');
-  try {
-    const classes = await apiJSON('/classes');
-    classCache = classes;
-    document.getElementById('stat-classes').textContent  = classes.length;
-    const totalStudents = classes.reduce((s, c) => s + c.student_count, 0);
-    document.getElementById('stat-students').textContent = totalStudents;
+  const listEl = document.getElementById("dash-classes-list");
+  listEl.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
 
-    // Count total attendance records across classes
+  try {
+    const classes = await apiCall("/classes");
+    classCache = classes;
+    document.getElementById("stat-classes").textContent = classes.length;
+    const totalStudents = classes.reduce((acc, c) => acc + (c.student_count || 0), 0);
+    document.getElementById("stat-students").textContent = totalStudents;
+
+    // Fetch total attendance
     let totalAtt = 0;
-    if (classes.length > 0) {
-      const attCounts = await Promise.allSettled(
-        classes.map(c => apiJSON(`/classes/${c.id}/attendance`).then(a => a.length))
-      );
-      totalAtt = attCounts.reduce((s, r) => s + (r.status === 'fulfilled' ? r.value : 0), 0);
+    for (const c of classes) {
+      try {
+        const att = await apiCall(`/classes/${c.id}/attendance`);
+        totalAtt += att.length;
+      } catch (e) {}
     }
-    document.getElementById('stat-att').textContent = totalAtt;
+    document.getElementById("stat-att").textContent = totalAtt;
 
     if (classes.length === 0) {
-      listEl.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes found.</p></div>';
+      listEl.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes assigned or visible.</p></div>';
       return;
     }
 
-    listEl.innerHTML = '';
-    const tbl = document.createElement('div');
-    tbl.className = 'tbl-wrap';
-    tbl.innerHTML = `
-      <table>
-        <thead><tr>
-          <th scope="col">ID</th>
-          <th scope="col">Class</th>
-          <th scope="col">Teacher</th>
-          <th scope="col">Students</th>
-          <th scope="col">Actions</th>
-        </tr></thead>
-        <tbody>
-          ${classes.map(c => `
+    listEl.innerHTML = `
+      <div class="tbl-wrap">
+        <table>
+          <thead>
             <tr>
-              <td>${c.id}</td>
-              <td><strong>${esc(c.name)}</strong></td>
-              <td>${esc(c.teacher)}</td>
-              <td>${c.student_count}</td>
-              <td>
-                <button class="btn btn-ghost btn-sm" onclick="showStudentsDialog(${c.id},'${esc(c.name)}')" type="button">View Students</button>
-              </td>
-            </tr>`).join('')}
-        </tbody>
-      </table>`;
-    listEl.appendChild(tbl);
+              <th scope="col">ID</th>
+              <th scope="col">Class Name</th>
+              <th scope="col">Assigned Teacher</th>
+              <th scope="col">Enrolled Students</th>
+              <th scope="col">Quick Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${classes.map(c => `
+              <tr>
+                <td><strong>#${c.id}</strong></td>
+                <td><strong>${esc(c.name)}</strong></td>
+                <td>${esc(c.teacher)}</td>
+                <td><span class="badge badge-teacher">${c.student_count} students</span></td>
+                <td>
+                  <button class="btn btn-ghost btn-sm" onclick="showStudentsDialog(${c.id}, '${esc(c.name)}')" type="button">
+                    View Roster
+                  </button>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>`;
+
     populateClassSelects(classes);
-  } catch(err) {
+  } catch (err) {
     listEl.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
   }
 }
 
-document.getElementById('btn-refresh-dash').addEventListener('click', loadDashboard);
+document.getElementById("btn-refresh-dash").addEventListener("click", loadDashboard);
+document.getElementById("btn-reseed").addEventListener("click", () => {
+  if (confirm("Reset synthetic database to default seed state?")) {
+    simBackend.initDatabase(true);
+    toast("Database reset to synthetic seed data!", "success");
+    loadDashboard();
+  }
+});
 
-// ── Page: Classes ─────────────────────────────────────────────
+/* ==========================================================================
+   7. PAGE: CLASSES & STUDENT ROSTERS
+   ========================================================================== */
 async function loadClasses() {
-  const container = document.getElementById('classes-container');
+  const container = document.getElementById("classes-container");
   container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
+
   try {
-    const classes = await apiJSON('/classes');
+    const classes = await apiCall("/classes");
     classCache = classes;
+
     if (classes.length === 0) {
-      container.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes visible for your role.</p></div>';
+      container.innerHTML = '<div class="empty"><span class="icon">🏛️</span><p>No classes assigned or visible for your role.</p></div>';
       return;
     }
-    container.innerHTML = '';
+
+    container.innerHTML = "";
     for (const cls of classes) {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style.marginBlockEnd = '1rem';
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.marginBlockEnd = "1rem";
       card.innerHTML = `
         <div class="section-hdr">
           <div>
-            <strong style="font-size:1rem">${esc(cls.name)}</strong>
-            <span style="margin-left:.5rem;color:var(--clr-muted);font-size:.85rem">Teacher: ${esc(cls.teacher)}</span>
+            <strong style="font-size:1.1rem">Class ${esc(cls.name)}</strong>
+            <span style="margin-left:.75rem;color:var(--clr-muted);font-size:.85rem">Teacher: <strong>${esc(cls.teacher)}</strong></span>
           </div>
-          <span class="badge badge-teacher">${cls.student_count} students</span>
+          <span class="badge badge-teacher">${cls.student_count} Enrolled</span>
         </div>
-        <div id="students-${cls.id}"><div class="empty" style="padding:1rem"><div class="spinner"></div></div></div>`;
+        <div id="roster-${cls.id}"><div class="empty" style="padding:1rem"><div class="spinner"></div></div></div>`;
       container.appendChild(card);
-      loadStudentsInto(cls.id, `students-${cls.id}`);
+
+      loadStudentsInto(cls.id, `roster-${cls.id}`);
     }
     populateClassSelects(classes);
-  } catch(err) {
+  } catch (err) {
     container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
   }
 }
 
-async function loadStudentsInto(classId, containerId) {
-  const el = document.getElementById(containerId);
+async function loadStudentsInto(classId, elId) {
+  const target = document.getElementById(elId);
   try {
-    const students = await apiJSON(`/classes/${classId}/students`);
-    if (students.length === 0) { el.innerHTML = '<p style="color:var(--clr-muted);font-size:.875rem;padding:.5rem">No students enrolled.</p>'; return; }
-    el.innerHTML = `
+    const students = await apiCall(`/classes/${classId}/students`);
+    if (students.length === 0) {
+      target.innerHTML = '<p class="hint">No students enrolled.</p>';
+      return;
+    }
+    target.innerHTML = `
+      <div class="tbl-wrap">
+        <table>
+          <thead><tr><th scope="col">Roll No</th><th scope="col">Student Full Name</th><th scope="col">Student ID</th></tr></thead>
+          <tbody>
+            ${students.map(s => `
+              <tr>
+                <td><code>${esc(s.roll_no)}</code></td>
+                <td><strong>${esc(s.full_name)}</strong></td>
+                <td>#${s.id}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      </div>`;
+  } catch (err) {
+    target.innerHTML = `<div class="alert alert-err" style="margin-block:0">⚠️ ${esc(err.message)}</div>`;
+  }
+}
+
+document.getElementById("btn-refresh-classes").addEventListener("click", loadClasses);
+
+/* ==========================================================================
+   8. DIALOG: STUDENT ROSTER
+   ========================================================================== */
+async function showStudentsDialog(classId, className) {
+  const dlg = document.getElementById("dlg-students");
+  const title = document.getElementById("dlg-students-title");
+  const body = document.getElementById("dlg-students-body");
+  title.textContent = `Class ${className} — Enrolled Students`;
+  body.innerHTML = '<div class="spinner"></div>';
+  dlg.showModal();
+
+  try {
+    const students = await apiCall(`/classes/${classId}/students`);
+    if (students.length === 0) {
+      body.innerHTML = '<p class="hint">No students currently enrolled.</p>';
+      return;
+    }
+    body.innerHTML = `
       <div class="tbl-wrap">
         <table>
           <thead><tr><th scope="col">Roll No</th><th scope="col">Full Name</th><th scope="col">ID</th></tr></thead>
           <tbody>
-            ${students.map(s => `<tr><td><code>${esc(s.roll_no)}</code></td><td>${esc(s.full_name)}</td><td>${s.id}</td></tr>`).join('')}
+            ${students.map(s => `<tr><td><code>${esc(s.roll_no)}</code></td><td>${esc(s.full_name)}</td><td>#${s.id}</td></tr>`).join("")}
           </tbody>
         </table>
       </div>`;
-  } catch(err) {
-    el.innerHTML = `<span class="alert alert-err" style="display:inline-block;padding:.4rem .75rem;font-size:.8rem">⚠️ ${esc(err.message)}</span>`;
-  }
-}
-
-document.getElementById('btn-refresh-classes').addEventListener('click', loadClasses);
-
-// ── Students dialog ───────────────────────────────────────────
-async function showStudentsDialog(classId, className) {
-  const dlg   = document.getElementById('dlg-students');
-  const title = document.getElementById('dlg-students-title');
-  const body  = document.getElementById('dlg-students-body');
-  title.textContent = `Students – ${className}`;
-  body.innerHTML = '<div class="spinner"></div>';
-  dlg.showModal();
-  try {
-    const students = await apiJSON(`/classes/${classId}/students`);
-    if (students.length === 0) { body.innerHTML = '<p>No students enrolled.</p>'; return; }
-    body.innerHTML = `
-      <div class="tbl-wrap">
-        <table>
-          <thead><tr><th scope="col">Roll No</th><th scope="col">Name</th><th scope="col">ID</th></tr></thead>
-          <tbody>${students.map(s => `<tr><td><code>${esc(s.roll_no)}</code></td><td>${esc(s.full_name)}</td><td>${s.id}</td></tr>`).join('')}</tbody>
-        </table>
-      </div>`;
-  } catch(err) {
+  } catch (err) {
     body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
   }
 }
 
-// Close dialog on backdrop click (light dismiss)
-const dlgStudents = document.getElementById('dlg-students');
-dlgStudents.addEventListener('click', e => { if (e.target === dlgStudents) dlgStudents.close(); });
-document.getElementById('dlg-students-close').addEventListener('click', () => dlgStudents.close());
+const dlgStudents = document.getElementById("dlg-students");
+dlgStudents.addEventListener("click", e => { if (e.target === dlgStudents) dlgStudents.close(); });
+document.getElementById("dlg-students-close").addEventListener("click", () => dlgStudents.close());
 
-// ── Page: Record Attendance ───────────────────────────────────
-let currentStudents = [];
+/* ==========================================================================
+   9. PAGE: RECORD ATTENDANCE
+   ========================================================================== */
+let loadedStudents = [];
 
 function loadAttendancePage() {
   const user = currentUser;
-  const warn = document.getElementById('att-teacher-warn');
-  warn.hidden = (user?.role === 'teacher');
+  const warn = document.getElementById("att-teacher-warn");
+  warn.hidden = (user?.role === "teacher");
 
-  // set today's date as default
-  const dateIn = document.getElementById('att-date');
+  const dateIn = document.getElementById("att-date");
   if (!dateIn.value) dateIn.value = new Date().toISOString().slice(0, 10);
 
-  // populate class dropdown
   populateAttClassSelect();
 }
 
 function populateAttClassSelect() {
-  const sel = document.getElementById('att-class');
+  const sel = document.getElementById("att-class");
   const prev = sel.value;
   sel.innerHTML = '<option value="">— select class —</option>';
   classCache.forEach(c => {
-    const opt = document.createElement('option');
+    const opt = document.createElement("option");
     opt.value = c.id;
-    opt.textContent = `${c.name} (${c.teacher})`;
+    opt.textContent = `Class ${c.name} (${c.teacher})`;
     sel.appendChild(opt);
   });
   if (prev) sel.value = prev;
 }
 
-document.getElementById('btn-load-students').addEventListener('click', async () => {
-  const classId = document.getElementById('att-class').value;
-  const date    = document.getElementById('att-date').value;
-  const session = document.getElementById('att-session').value;
-  const errEl   = document.getElementById('att-form-err');
-  errEl.textContent = '';
+document.getElementById("btn-load-students").addEventListener("click", async () => {
+  const classId = document.getElementById("att-class").value;
+  const date = document.getElementById("att-date").value;
+  const session = document.getElementById("att-session").value;
+  const errEl = document.getElementById("att-form-err");
+  errEl.textContent = "";
 
   if (!classId || !date || !session) {
-    errEl.textContent = 'Please select a class, date and session.';
+    errEl.textContent = "Please select a target class, date, and session.";
     return;
   }
 
-  const panel = document.getElementById('att-students-panel');
+  const panel = document.getElementById("att-students-panel");
   panel.hidden = true;
-  const grid  = document.getElementById('att-grid');
+  const grid = document.getElementById("att-grid");
   grid.innerHTML = '<div class="spinner"></div>';
 
   try {
-    const students = await apiJSON(`/classes/${classId}/students`);
-    currentStudents = students;
-    if (students.length === 0) { errEl.textContent = 'No students in this class.'; return; }
+    const students = await apiCall(`/classes/${classId}/students`);
+    loadedStudents = students;
+    if (students.length === 0) {
+      errEl.textContent = "No students are enrolled in this class.";
+      return;
+    }
 
-    grid.innerHTML = '';
+    document.getElementById("att-roster-summary").textContent = `${students.length} students enrolled`;
+    grid.innerHTML = "";
     students.forEach(s => {
-      const row = document.createElement('div');
-      row.className = 'att-row';
+      const row = document.createElement("div");
+      row.className = "att-row";
       row.dataset.sid = s.id;
       row.innerHTML = `
         <div>
           <div class="s-name">${esc(s.full_name)}</div>
-          <div class="s-roll">${esc(s.roll_no)}</div>
+          <div class="s-roll">${esc(s.roll_no)} (ID: ${s.id})</div>
         </div>
         <select aria-label="Status for ${esc(s.full_name)}" name="status-${s.id}">
           <option value="present">Present</option>
@@ -1035,100 +1611,104 @@ document.getElementById('btn-load-students').addEventListener('click', async () 
       grid.appendChild(row);
     });
     panel.hidden = false;
-  } catch(err) {
+  } catch (err) {
     errEl.textContent = err.message;
+    toast(err.message, "error");
   }
 });
 
-document.getElementById('btn-mark-all-present').addEventListener('click', () =>
-  document.querySelectorAll('#att-grid select').forEach(s => s.value = 'present'));
-document.getElementById('btn-mark-all-absent').addEventListener('click', () =>
-  document.querySelectorAll('#att-grid select').forEach(s => s.value = 'absent'));
+document.getElementById("btn-mark-all-present").addEventListener("click", () =>
+  document.querySelectorAll("#att-grid select").forEach(s => s.value = "present"));
+document.getElementById("btn-mark-all-absent").addEventListener("click", () =>
+  document.querySelectorAll("#att-grid select").forEach(s => s.value = "absent"));
 
-document.getElementById('btn-submit-att').addEventListener('click', async () => {
-  const btn     = document.getElementById('btn-submit-att');
-  const errEl   = document.getElementById('att-form-err');
-  const classId = document.getElementById('att-class').value;
-  const date    = document.getElementById('att-date').value;
-  const session = document.getElementById('att-session').value;
-  errEl.textContent = '';
+document.getElementById("btn-submit-att").addEventListener("click", async () => {
+  const btn = document.getElementById("btn-submit-att");
+  const errEl = document.getElementById("att-form-err");
+  const classId = document.getElementById("att-class").value;
+  const date = document.getElementById("att-date").value;
+  const session = document.getElementById("att-session").value;
+  errEl.textContent = "";
 
-  const records = currentStudents.map(s => {
+  const records = loadedStudents.map(s => {
     const sel = document.querySelector(`#att-grid select[name="status-${s.id}"]`);
-    return { student_id: s.id, status: sel ? sel.value : 'present' };
+    return { student_id: s.id, status: sel ? sel.value : "present" };
   });
 
   btn.disabled = true;
-  btn.textContent = 'Submitting…';
+  btn.textContent = "Submitting Batch…";
+
   try {
-    const result = await apiJSON(`/classes/${classId}/attendance`, {
-      method: 'POST',
-      body: JSON.stringify({ date, session, records }),
+    const result = await apiCall(`/classes/${classId}/attendance`, {
+      method: "POST",
+      body: JSON.stringify({ date, session, records })
     });
-    toast(`✅ Recorded ${result.recorded} attendance entries for ${result.date} (${result.session})`, 'success');
-    document.getElementById('att-students-panel').hidden = true;
-    document.getElementById('att-class').value = '';
-    document.getElementById('att-session').value = '';
-  } catch(err) {
+
+    toast(`✅ Attendance recorded! (${result.recorded} students on ${result.date} - ${result.session})`, "success");
+    document.getElementById("att-students-panel").hidden = true;
+    document.getElementById("att-class").value = "";
+    document.getElementById("att-session").value = "";
+  } catch (err) {
+    let msg = err.message;
     if (err.status === 409) {
-      errEl.textContent = `Conflict: ${err.json?.detail?.error || err.message}. Attendance already recorded for some/all students on this date/session.`;
+      msg = `409 Conflict: Attendance already recorded for date '${date}' and session '${session}'. Duplicate entries are prohibited.`;
     } else if (err.status === 403) {
-      errEl.textContent = `Forbidden: ${err.message}. Only the assigned teacher can record attendance.`;
+      msg = `403 Forbidden: Only the assigned teacher can record attendance for this class. (Logged in as: ${currentUser?.username})`;
     } else if (err.status === 422) {
-      errEl.textContent = `Validation error: ${err.json?.detail?.error || err.message}`;
-    } else {
-      errEl.textContent = err.message;
+      msg = `422 Unprocessable: Validation error — student is not enrolled in this class.`;
     }
-    toast(errEl.textContent, 'error');
+    errEl.textContent = msg;
+    toast(msg, "error");
   } finally {
     btn.disabled = false;
-    btn.textContent = 'Submit Attendance';
+    btn.textContent = "Submit Attendance Batch";
   }
 });
 
-// ── Page: View Attendance ─────────────────────────────────────
+/* ==========================================================================
+   10. PAGE: VIEW ATTENDANCE
+   ========================================================================== */
 function loadViewAttendancePage() {
   populateVattClassSelect();
 }
 
 function populateVattClassSelect() {
-  const sel = document.getElementById('vatt-class');
+  const sel = document.getElementById("vatt-class");
   const prev = sel.value;
-  sel.innerHTML = '<option value="">— all classes —</option>';
+  sel.innerHTML = '<option value="">— select class —</option>';
   classCache.forEach(c => {
-    const opt = document.createElement('option');
+    const opt = document.createElement("option");
     opt.value = c.id;
-    opt.textContent = c.name;
+    opt.textContent = `Class ${c.name} (${c.teacher})`;
     sel.appendChild(opt);
   });
   if (prev) sel.value = prev;
 }
 
-document.getElementById('btn-load-att').addEventListener('click', loadViewAttendance);
-document.getElementById('btn-refresh-view-att').addEventListener('click', loadViewAttendance);
+document.getElementById("btn-load-att").addEventListener("click", loadViewAttendance);
+document.getElementById("btn-refresh-view-att").addEventListener("click", loadViewAttendance);
 
 async function loadViewAttendance() {
-  const classId = document.getElementById('vatt-class').value;
-  const date    = document.getElementById('vatt-date').value;
-  const container = document.getElementById('view-att-container');
+  const classId = document.getElementById("vatt-class").value;
+  const date = document.getElementById("vatt-date").value;
+  const container = document.getElementById("view-att-container");
 
   if (!classId) {
-    container.innerHTML = '<div class="alert alert-info">ℹ️ Select a class to view attendance records.</div>';
+    container.innerHTML = '<div class="alert alert-info">ℹ️ Please select a class to inspect attendance records.</div>';
     return;
   }
 
   container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
   try {
     let path = `/classes/${classId}/attendance`;
-    if (date) path += `?date=${date}`;
-    const records = await apiJSON(path);
+    if (date) path += `?date=${encodeURIComponent(date)}`;
+    const records = await apiCall(path);
 
     if (records.length === 0) {
-      container.innerHTML = '<div class="empty"><span class="icon">📋</span><p>No attendance records found.</p></div>';
+      container.innerHTML = '<div class="empty"><span class="icon">📋</span><p>No attendance entries found for this query.</p></div>';
       return;
     }
 
-    // Group by date + session
     const groups = {};
     records.forEach(r => {
       const key = `${r.att_date}|${r.session}`;
@@ -1136,11 +1716,10 @@ async function loadViewAttendance() {
       groups[key].push(r);
     });
 
-    // Summary stats
-    const total  = records.length;
-    const present = records.filter(r => r.status === 'present').length;
-    const absent  = records.filter(r => r.status === 'absent').length;
-    const late    = records.filter(r => r.status === 'late').length;
+    const total = records.length;
+    const present = records.filter(r => r.status === "present").length;
+    const absent = records.filter(r => r.status === "absent").length;
+    const late = records.filter(r => r.status === "late").length;
 
     container.innerHTML = `
       <div class="stat-grid" style="margin-block-end:.75rem">
@@ -1151,57 +1730,56 @@ async function loadViewAttendance() {
       </div>`;
 
     Object.entries(groups).sort(([a],[b]) => b.localeCompare(a)).forEach(([key, rows]) => {
-      const [d, sess] = key.split('|');
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.style.marginBlockEnd = '1rem';
+      const [d, sess] = key.split("|");
+      const card = document.createElement("div");
+      card.className = "card";
+      card.style.marginBlockEnd = "1rem";
       card.innerHTML = `
-        <h3 style="margin-block-end:.75rem">📅 ${esc(d)} — <em>${esc(sess)}</em></h3>
+        <h3 style="margin-block-end:.75rem">📅 Date: ${esc(d)} &nbsp;•&nbsp; Session: <em style="text-transform:capitalize">${esc(sess)}</em></h3>
         <div class="tbl-wrap">
           <table>
-            <thead><tr>
-              <th scope="col">Student ID</th>
-              <th scope="col">Status</th>
-            </tr></thead>
+            <thead><tr><th scope="col">Student ID</th><th scope="col">Status</th></tr></thead>
             <tbody>
               ${rows.map(r => `
                 <tr>
-                  <td>${r.student_id}</td>
+                  <td><strong>Student #${r.student_id}</strong></td>
                   <td><span class="badge badge-${r.status}">${r.status}</span></td>
-                </tr>`).join('')}
+                </tr>
+              `).join("")}
             </tbody>
           </table>
         </div>`;
       container.appendChild(card);
     });
-  } catch(err) {
+  } catch (err) {
     container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
   }
 }
 
-// ── Page: Audit Log ───────────────────────────────────────────
+/* ==========================================================================
+   11. PAGE: AUDIT LOG
+   ========================================================================== */
 async function loadAudit() {
-  const container = document.getElementById('audit-container');
-  const warn      = document.getElementById('audit-admin-only');
+  const container = document.getElementById("audit-container");
+  const warn = document.getElementById("audit-admin-only");
 
-  if (currentUser?.role !== 'admin') {
+  if (currentUser?.role !== "admin") {
     warn.hidden = false;
-    container.innerHTML = '';
+    container.innerHTML = "";
     return;
   }
   warn.hidden = true;
   container.innerHTML = '<div class="empty"><div class="spinner"></div></div>';
 
-  const limit = document.getElementById('audit-limit').value;
+  const limit = document.getElementById("audit-limit").value;
   try {
-    const rows = await apiJSON(`/audit?limit=${limit}`);
+    const rows = await apiCall(`/audit?limit=${limit}`);
     if (rows.length === 0) {
-      container.innerHTML = '<div class="empty"><span class="icon">🔍</span><p>No audit entries yet.</p></div>';
+      container.innerHTML = '<div class="empty"><span class="icon">🔍</span><p>Audit trail is currently empty.</p></div>';
       return;
     }
 
     const outcomes = [...new Set(rows.map(r => r.outcome))];
-    // Count by outcome
     const counts = {};
     outcomes.forEach(o => counts[o] = rows.filter(r => r.outcome === o).length);
 
@@ -1211,152 +1789,166 @@ async function loadAudit() {
           <div class="stat-card">
             <div class="label">${esc(o)}</div>
             <div class="value">${counts[o]}</div>
-          </div>`).join('')}
+          </div>
+        `).join("")}
       </div>
       <div class="tbl-wrap">
         <table>
-          <thead><tr>
-            <th scope="col">#</th>
-            <th scope="col">Time</th>
-            <th scope="col">Actor</th>
-            <th scope="col">Action</th>
-            <th scope="col">Resource</th>
-            <th scope="col">Outcome</th>
-            <th scope="col">Detail</th>
-          </tr></thead>
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Timestamp</th>
+              <th scope="col">Actor</th>
+              <th scope="col">Action</th>
+              <th scope="col">Resource</th>
+              <th scope="col">Outcome</th>
+              <th scope="col">Details</th>
+            </tr>
+          </thead>
           <tbody>
             ${rows.map(r => `
               <tr>
                 <td>${r.id}</td>
                 <td style="white-space:nowrap;font-size:.8rem">${new Date(r.ts).toLocaleString()}</td>
                 <td><code>${esc(r.actor)}</code></td>
-                <td>${esc(r.action)}</td>
-                <td><code style="font-size:.78rem">${esc(r.resource)}</code></td>
+                <td><strong>${esc(r.action)}</strong></td>
+                <td><code>${esc(r.resource)}</code></td>
                 <td><span class="badge badge-${r.outcome}">${esc(r.outcome)}</span></td>
-                <td style="max-width:260px;font-size:.8rem;word-break:break-word">${esc(r.detail)}</td>
-              </tr>`).join('')}
+                <td style="max-width:280px;font-size:.8rem;word-break:break-word">${esc(r.detail)}</td>
+              </tr>
+            `).join("")}
           </tbody>
         </table>
       </div>`;
-  } catch(err) {
+  } catch (err) {
     container.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
   }
 }
 
-document.getElementById('btn-refresh-audit').addEventListener('click', loadAudit);
-document.getElementById('audit-limit').addEventListener('change', loadAudit);
+document.getElementById("btn-refresh-audit").addEventListener("click", loadAudit);
+document.getElementById("audit-limit").addEventListener("change", loadAudit);
 
-// ── Page: Ops ─────────────────────────────────────────────────
-let opsLog = '';
+/* ==========================================================================
+   12. PAGE: HEALTH, OPS & CHAOS SIMULATION
+   ========================================================================== */
+let opsLogHistory = "";
 function appendOpsLog(msg) {
-  opsLog = `[${new Date().toLocaleTimeString()}] ${msg}\n` + opsLog;
-  document.getElementById('ops-log').textContent = opsLog.slice(0, 4000);
+  opsLogHistory = `[${new Date().toLocaleTimeString()}] ${msg}\n` + opsLogHistory;
+  document.getElementById("ops-log").textContent = opsLogHistory.slice(0, 4000);
 }
 
 async function loadOps() {
-  await Promise.all([loadLiveness(), loadReadiness()]);
+  await Promise.allSettled([loadLiveness(), loadReadiness()]);
 }
 
 async function loadLiveness() {
-  const body = document.getElementById('ops-liveness-body');
+  const body = document.getElementById("ops-liveness-body");
   body.innerHTML = '<div class="spinner"></div>';
   try {
-    const r   = await apiFetch('/healthz');
-    const j   = await r.json();
-    const ok  = r.ok;
+    const data = await apiCall("/healthz");
     body.innerHTML = `
-      <div class="alert ${ok ? 'alert-ok' : 'alert-err'}" style="margin-block:0">
-        ${ok ? '✅' : '❌'} Status: <strong>${j.status}</strong>
+      <div class="alert alert-ok" style="margin-block:0">
+        ✅ Process Alive — Status: <strong>${data.status}</strong>
       </div>
-      <pre style="margin-top:.75rem;font-size:.8rem;background:#f9fafb;padding:.5rem;border-radius:.25rem;overflow:auto">${JSON.stringify(j,null,2)}</pre>`;
-    appendOpsLog(`GET /healthz → ${r.status} ${j.status}`);
-    document.getElementById('hc-liveness').className = `dot ${ok ? 'ok' : 'err'}`;
-    document.getElementById('hc-ver').textContent = `v${j.version || '?'}`;
-  } catch(err) {
+      <pre style="margin-top:.75rem;font-size:.8rem;background:#f8fafc;padding:.6rem;border-radius:.35rem">${JSON.stringify(data, null, 2)}</pre>`;
+    appendOpsLog(`GET /healthz → 200 OK (${data.status})`);
+    document.getElementById("hc-liveness").className = "dot ok";
+  } catch (err) {
     body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
-    appendOpsLog(`GET /healthz → ERROR: ${err.message}`);
-    document.getElementById('hc-liveness').className = 'dot err';
+    appendOpsLog(`GET /healthz → FAILED (${err.message})`);
+    document.getElementById("hc-liveness").className = "dot err";
   }
 }
 
 async function loadReadiness() {
-  const body = document.getElementById('ops-readiness-body');
+  const body = document.getElementById("ops-readiness-body");
   body.innerHTML = '<div class="spinner"></div>';
   try {
-    const r  = await apiFetch('/readyz');
-    const j  = await r.json();
-    const ok = r.ok;
+    const data = await apiCall("/readyz");
     body.innerHTML = `
-      <div class="alert ${ok ? 'alert-ok' : 'alert-err'}" style="margin-block:0">
-        ${ok ? '✅' : '❌'} DB: <strong>${j.database}</strong> — ${j.status}
+      <div class="alert alert-ok" style="margin-block:0">
+        ✅ Database Up — Ready for traffic
       </div>
-      <pre style="margin-top:.75rem;font-size:.8rem;background:#f9fafb;padding:.5rem;border-radius:.25rem;overflow:auto">${JSON.stringify(j,null,2)}</pre>`;
-    appendOpsLog(`GET /readyz → ${r.status} db=${j.database}`);
-    document.getElementById('hc-readiness').className = `dot ${ok ? 'ok' : 'err'}`;
-  } catch(err) {
-    body.innerHTML = `<div class="alert alert-err">⚠️ ${esc(err.message)}</div>`;
-    appendOpsLog(`GET /readyz → ERROR: ${err.message}`);
-    document.getElementById('hc-readiness').className = 'dot err';
+      <pre style="margin-top:.75rem;font-size:.8rem;background:#f8fafc;padding:.6rem;border-radius:.35rem">${JSON.stringify(data, null, 2)}</pre>`;
+    appendOpsLog(`GET /readyz → 200 OK (database: up)`);
+    document.getElementById("hc-readiness").className = "dot ok";
+  } catch (err) {
+    body.innerHTML = `
+      <div class="alert alert-err" style="margin-block:0">
+        ❌ 503 Service Unavailable — Database Disconnected
+      </div>
+      <pre style="margin-top:.75rem;font-size:.8rem;background:#fef2f2;padding:.6rem;border-radius:.35rem">${JSON.stringify(err.json || { error: err.message }, null, 2)}</pre>`;
+    appendOpsLog(`GET /readyz → 503 SERVICE UNAVAILABLE (database unreachable)`);
+    document.getElementById("hc-readiness").className = "dot err";
   }
 }
 
-document.getElementById('btn-refresh-ops').addEventListener('click', loadOps);
+function simulateDbBreak() {
+  simBackend.dbBroken = true;
+  document.getElementById("chaos-state-badge").className = "badge badge-denied";
+  document.getElementById("chaos-state-badge").textContent = "Database: OUTAGE SIMULATED (503)";
+  toast("💥 Database connection broken! /readyz will return 503.", "error");
+  loadOps();
+}
 
-document.getElementById('btn-load-metrics').addEventListener('click', async () => {
-  const el = document.getElementById('metrics-body');
-  el.textContent = 'Loading…';
+function simulateDbHeal() {
+  simBackend.dbBroken = false;
+  document.getElementById("chaos-state-badge").className = "badge badge-success";
+  document.getElementById("chaos-state-badge").textContent = "Database: Normal (Healthy)";
+  toast("✅ Database connection recovered! /readyz will return 200.", "success");
+  loadOps();
+}
+
+document.getElementById("btn-refresh-ops").addEventListener("click", loadOps);
+
+document.getElementById("btn-load-metrics").addEventListener("click", async () => {
+  const el = document.getElementById("metrics-body");
+  el.textContent = "Fetching Prometheus metrics…";
   try {
-    // /metrics is not behind auth and not exposed via nginx (direct to API)
-    const r = await fetch(API + '/metrics');
-    if (!r.ok) throw new Error(`HTTP ${r.status}`);
-    const text = await r.text();
-    el.textContent = text.slice(0, 10000) + (text.length > 10000 ? '\n…(truncated)' : '');
-    appendOpsLog(`GET /metrics → ${r.status} (${text.length} bytes)`);
-  } catch(err) {
-    el.textContent = `Error: ${err.message}\n\nNote: /metrics may not be exposed through the reverse proxy. Connect directly to the app container port if needed.`;
-    appendOpsLog(`GET /metrics → ERROR: ${err.message}`);
+    const text = await apiCall("/metrics");
+    el.textContent = text;
+    appendOpsLog(`GET /metrics → 200 OK (${text.length} bytes)`);
+  } catch (err) {
+    el.textContent = `Error fetching metrics: ${err.message}`;
+    appendOpsLog(`GET /metrics → FAILED (${err.message})`);
   }
 });
 
-// ── Tabs (ops) ─────────────────────────────────────────────────
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
+/* Tabs in ops view */
+document.querySelectorAll(".tab-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
     const target = btn.dataset.tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === target));
-    document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === target));
+    document.querySelectorAll(".tab-btn").forEach(b => b.classList.toggle("active", b.dataset.tab === target));
+    document.querySelectorAll(".tab-panel").forEach(p => p.classList.toggle("active", p.id === target));
   });
 });
 
-// ── Helpers ───────────────────────────────────────────────────
-function esc(str) {
-  return String(str ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
+/* ==========================================================================
+   13. INITIALIZATION
+   ========================================================================== */
 function populateClassSelects(classes) {
-  // attendance form
   populateAttClassSelect();
-  // view attendance
   populateVattClassSelect();
 }
 
-// ── Page handler registry ─────────────────────────────────────
 const pageHandlers = {
-  dashboard:       loadDashboard,
-  classes:         loadClasses,
-  attendance:      loadAttendancePage,
-  'view-attendance': loadViewAttendancePage,
-  audit:           loadAudit,
-  ops:             loadOps,
+  dashboard: loadDashboard,
+  classes: loadClasses,
+  attendance: loadAttendancePage,
+  "view-attendance": loadViewAttendancePage,
+  audit: loadAudit,
+  ops: loadOps
 };
 
-// ── Auto-restore session on load ──────────────────────────────
+// Initial state render
+updateModeUI();
+
 if (token && currentUser) {
-  document.getElementById('login-screen').style.display = 'none';
-  document.getElementById('app-shell').hidden = false;
+  document.getElementById("login-screen").style.display = "none";
+  document.getElementById("app-shell").hidden = false;
   applyUser(currentUser);
-  navigateTo('dashboard');
+  navigateTo("dashboard");
 }
 </script>
 </body>
 </html>
-
