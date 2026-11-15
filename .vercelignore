@@ -1,0 +1,16 @@
+# Tell Vercel to treat this repository as a pure static web deployment
+# and prevent it from trying to run FastAPI/Python as serverless functions.
+app/
+tests/
+deploy/
+scripts/
+secrets/
+backups/
+evidence/
+docs/
+Dockerfile
+docker-compose.yml
+Makefile
+requirements*.txt
+pyproject.toml
+venv/
